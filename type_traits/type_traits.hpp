@@ -91,3 +91,18 @@ namespace isl {
         using type = const T;
     };
 }
+
+namespace isl {
+    template<class T>
+    struct remove_reference {
+        using type = T;
+    };
+    template<class T>
+    struct remove_reference<T&> {
+        using type = T;
+    };
+    template<class T>
+    struct remove_reference<T&&> {
+        using type = T;
+    };
+}
