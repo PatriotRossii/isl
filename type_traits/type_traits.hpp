@@ -105,4 +105,26 @@ namespace isl {
     struct remove_reference<T&&> {
         using type = T;
     };
+
+    template<class T>
+    struct add_lvalue_reference {
+        using type = T&;
+    };
+    template<>
+    struct add_lvalue_reference<void> {
+        using type = void;
+    };
+    template<class T>
+    using add_lvalue_reference_t = typename add_lvalue_reference<T>::type;
+
+    template<class T>
+    struct add_rvalue_reference {
+        using type = T&&;
+    };
+    template<>
+    struct add_rvalue_reference<void> {
+        using type = void;
+    };
+    template<class T>
+    using add_rvalue_reference_t = typename add_rvalue_reference<T>::type;
 }
