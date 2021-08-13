@@ -75,3 +75,19 @@ namespace isl {
     using remove_cv_t = typename remove_cv<T>::type;
 }
 
+namespace isl {
+    template<class T>
+    struct add_cv {
+        using type = const volatile T;
+    };
+
+    template<class T>
+    struct add_volatile {
+        using type = volatile T;
+    };
+
+    template<class T>
+    struct add_const {
+        using type = const T;
+    };
+}
