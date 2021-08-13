@@ -45,6 +45,20 @@ TEST(type_traits, TestRemoveCV) {
     ASSERT_TRUE(same5);
 }
 
+TEST(type_traits, TestAddCV) {
+    using type1 = isl::add_cv<int>::type;
+    using type2 = isl::add_const<int>::type;
+    using type3 = isl::add_volatile<int>::type;
+
+    constexpr bool same1 = std::is_same_v<const volatile int, type1>;
+    constexpr bool same2 = std::is_same_v<const int, type2>;
+    constexpr bool same3 = std::is_same_v<volatile int, type3>;
+
+    ASSERT_TRUE(same1);
+    ASSERT_TRUE(same2);
+    ASSERT_TRUE(same3); 
+}
+
 int main(int argc, char *argv[]) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
