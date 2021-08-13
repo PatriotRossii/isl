@@ -75,6 +75,7 @@ namespace isl {
     using remove_cv_t = typename remove_cv<T>::type;
 }
 
+// Add cv
 namespace isl {
     template<class T>
     struct add_cv {
@@ -92,6 +93,7 @@ namespace isl {
     };
 }
 
+// References
 namespace isl {
     template<class T>
     struct remove_reference {
