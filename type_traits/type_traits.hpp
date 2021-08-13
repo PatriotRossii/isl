@@ -30,18 +30,8 @@ namespace isl {
         using type = T;
     };
     template<class T>
-    struct remove_const<T*> {
-        using type = T*;
-
-    };
-
-    template<class T>
     struct remove_const<const T> {
         using type = T;
-    };
-    template<class T>
-    struct remove_const<T* const> {
-        using type = T*;
     };
 
     template<class T>
@@ -54,17 +44,8 @@ namespace isl {
         using type = T;
     };
     template<class T>
-    struct remove_volatile<T*> {
-        using type = T*;
-    };
-
-    template<class T>
     struct remove_volatile<volatile T> {
         using type = T;
-    };
-    template<class T>
-    struct remove_volatile<T* volatile> {
-        using type = T*;
     };
 
     template<class T>
@@ -75,10 +56,6 @@ namespace isl {
     template<class T>
     struct remove_cv {
         using type = T;
-    };
-    template<class T>
-    struct remove_cv<T*> {
-        using type = T*;
     };
 
     template<class T>
@@ -92,18 +69,6 @@ namespace isl {
     template<typename T>
     struct remove_cv<const T> {
         using type = T;
-    };
-    template<typename T>
-    struct remove_cv<T* volatile> {
-        using type = T*;
-    };
-    template<typename T>
-    struct remove_cv<T* const> {
-        using type = T*;
-    };
-    template<typename T>
-    struct remove_cv<T* const volatile> {
-        using type = T*;
     };
 
     template<class T>
