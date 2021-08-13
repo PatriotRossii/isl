@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <type_traits> // std::is_same
 
-#include "../type_traits.h" // isl::integral_constant
+#include "../type_traits.hpp" // isl::integral_constant
 
 TEST(type_traits, TestIntegralConstant) {
     using two_t = isl::integral_constant<int, 2>;
@@ -23,6 +23,26 @@ TEST(type_traits, TestIntegralConstant) {
     using same = std::is_same<my_e_e2, my_e_e2>;
     ASSERT_TRUE(same::value)
         << "my_e_e2 != my_e_e2";
+}
+
+TEST(type_traits, TestRemoveCV) {
+    using type1 = isl::remove_cv<const int>::type;
+    using type2 = isl::remove_cv<volatile int>::type;
+    using type3 = isl::remove_cv<const volatile int>::type;
+    using type4 = isl::remove_cv<const volatile int*>::type;
+    using type5 = isl::remove_cv<int * const volatile>::type;
+
+    constexpr bool same1 = std::is_same_v<int, type1>;
+    constexpr bool same2 = std::is_same_v<int, type2>;
+    constexpr bool same3 = std::is_same_v<int, type3>;
+    constexpr bool same4 = std::is_same_v<const volatile int*, type4>;
+    constexpr bool same5 = std::is_same_v<int*, type5>;
+
+    ASSERT_TRUE(same1);
+    ASSERT_TRUE(same2);
+    ASSERT_TRUE(same3);
+    ASSERT_TRUE(same4);
+    ASSERT_TRUE(same5);
 }
 
 int main(int argc, char *argv[]) {
