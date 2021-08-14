@@ -229,6 +229,24 @@ namespace isl {
 
     template<class T>
     inline constexpr bool is_array_v = is_array<T>::value;
+
+    // std::is_lvalue_reference
+
+    template<class T>
+    struct is_lvalue_reference: isl::false_type { };
+    template<class T>
+    struct is_lvalue_reference<T&>: isl::true_type { };
+
+    template<class T>
+    inline constexpr bool is_lvalue_reference_t = is_lvalue_reference<T>::value;
+
+    template<class T>
+    struct is_rvalue_reference: isl::false_type { };
+    template<class T>
+    struct is_rvalue_reference<T&&>: isl::true_type { };
+
+    template<class T>
+    inline constexpr bool is_rvalue_reference_t = is_rvalue_reference<T>::value;
 }
 
 
