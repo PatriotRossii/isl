@@ -192,7 +192,29 @@ namespace isl {
     // helper variable
 
     template<class T>
-    inline constexpr bool is_integral_v = is_integral<T>::value;    
+    inline constexpr bool is_integral_v = is_integral<T>::value;
+
+    // is_floating_point
+
+    namespace detail {
+        template<class T>
+        struct is_floating_point: isl::false_type { };
+
+        template<>
+        struct is_floating_point<float>: isl::true_type { };
+        template<>
+        struct is_floating_point<double>: isl::true_type { };
+        template<>
+        struct is_floating_point<long double>: isl::true_type { };
+    }
+
+    template<class T>
+    struct is_floating_point: detail::is_floating_point<isl::remove_cv_t<T>> { };
+
+    // helper variable
+
+    template<class T>
+    inline constexpr bool is_floating_point_v = is_floating_point<T>::value; 
 }
 
 
