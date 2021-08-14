@@ -214,7 +214,21 @@ namespace isl {
     // helper variable
 
     template<class T>
-    inline constexpr bool is_floating_point_v = is_floating_point<T>::value; 
+    inline constexpr bool is_floating_point_v = is_floating_point<T>::value;
+
+    // is_array
+
+    template<class T>
+    struct is_array: isl::false_type { };
+    template<class T>
+    struct is_array<T[]>: isl::true_type { };
+    template<class T, std::size_t N>
+    struct is_array<T[N]>: isl::true_type { };
+
+    // helper varialbe
+
+    template<class T>
+    inline constexpr bool is_array_v = is_array<T>::value;
 }
 
 
