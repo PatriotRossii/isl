@@ -351,6 +351,14 @@ namespace isl {
 
     template<class T>
     inline constexpr bool is_fundamental_v = is_fundamental<T>::value;
+
+    template<class T>
+    struct is_arithmetic: isl::bool_constant<
+        isl::is_integral_v<T> || isl::is_floating_point_v<T>
+    >{};
+
+    template<class T>
+    inline constexpr bool is_arithmetic_v = is_arithmetic<T>::value;
 }
 
 // Pointers
