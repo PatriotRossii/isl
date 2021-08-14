@@ -324,6 +324,26 @@ namespace isl {
     using add_rvalue_reference_t = typename add_rvalue_reference<T>::type;
 }
 
+// Type properties
+namespace isl {
+    template<class T>
+    struct is_const: isl::false_type { };
+    template<class T>
+    struct is_const<const T>: isl::true_type { };
+
+    template<class T>
+    inline constexpr bool is_const_v = is_const<T>::value;
+
+    template<class T>
+    struct is_volatile: isl::false_type { };
+    template<class T>
+    struct is_volatile<volatile T>: isl::true_type { };
+
+    template<class T>
+    inline constexpr bool is_volatile_v = is_volatile<T>::value;
+
+}
+
 // Pointers
 namespace isl {
     template<class T>
