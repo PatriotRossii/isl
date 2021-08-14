@@ -367,6 +367,21 @@ namespace isl {
     template<class T>
     inline constexpr bool is_unsigned_v = is_unsigned<T>::value;
 
+    template<class T>
+    struct is_bounded_array: isl::false_type { };
+    template<class T, size_t N>
+    struct is_bounded_array<T[N]>: isl::true_type { };
+
+    template<class T>
+    inline constexpr bool is_bounded_array_v = is_bounded_array<T>::value;
+
+    template<class T>
+    struct is_unbounded_array: isl::false_type { };
+    template<class T>
+    struct is_unbounded_array<T[]>: isl::true_type { };
+
+    template<class T>
+    inline constexpr bool is_unbounded_array_v = is_unbounded_array<T>::value;
 }
 
 // Composite type categories
