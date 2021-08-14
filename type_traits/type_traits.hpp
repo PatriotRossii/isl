@@ -247,6 +247,24 @@ namespace isl {
 
     template<class T>
     inline constexpr bool is_rvalue_reference_t = is_rvalue_reference<T>::value;
+
+    // std::is_pointer
+
+    namespace detail {
+        template<class T>
+        struct is_pointer: isl::false_type { };
+        template<>
+        struct is_pointer<T*>: isl::true_type { };
+    }
+
+    template<class T>
+    struct is_pointer: detail::is_pointer<isl::remove_cv_t<T>> { };
+
+    // helper variable
+
+    template<class T>
+    inline constexpr bool is_pointer_v = is_pointer<T>::value;
+
 }
 
 
