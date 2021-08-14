@@ -1,3 +1,5 @@
+#include <utility> // std::declval
+
 namespace isl {
     template<class T>
     struct type_identity {
@@ -36,6 +38,28 @@ namespace isl {
     struct is_same<T, T>: isl::true_type {};
     template<class T, class U>
     inline constexpr bool is_same_v = is_same<T, U>::value;
+
+    namespace detail {
+        template<class From, class To, bool is_noexcept>
+        To test_convertible() noexcept(is_noexcept) {
+            return std::declval<From>();
+        }
+
+        template<typename From, typename To, bool is_noexcept>
+        auto try_convert(int) -> is_same<decltype(test_convertible<From, To, is_noexcept>), decltype(test_convertible<From, To, is_noexcept>)>;
+        template<typename From, typename To>
+        auto try_convert(...) -> isl::false_type;
+    }
+    template<class From, class To>
+    struct is_convertible: decltype(detail::try_convert<From, To, false>(0)) { };
+    template<class From, class To>
+    inline constexpr bool is_convertible_v = is_convertible<From, To>::value;
+
+    template<class From, class To>
+    struct is_nothrow_convertible: decltype(detail::try_convert<From, To, true>(0)) { };
+    template<class From, class To>
+    inline constexpr bool is_nothrow_convertible_v = is_nothrow_convertible<From, To>::value;
+
 }
 
 // Const-volatility specifiers
