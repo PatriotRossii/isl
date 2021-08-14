@@ -162,4 +162,15 @@ namespace isl {
     };
     template<class T>
     using remove_pointer_t = typename remove_pointer<T>::type;
+
+    namespace detail {
+        template<typename T>
+        auto try_add_pointer(int) -> isl::type_identity<isl::remove_reference<T>*>;
+        template<typename T>
+        auto try_add_pointer(...) -> isl::type_identity<T>;
+    }
+    template<class T>
+    struct add_pointer: decltype(detail::try_add_pointer<T>(0)) { };
+    template<class T>
+    using add_pointer_t = typename add_pointer<T>::type;
 }
