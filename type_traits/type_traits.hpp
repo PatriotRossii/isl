@@ -1,4 +1,5 @@
 #include <utility> // std::declval
+#include <cstddef> // std::nullptr_t
 
 namespace isl {
     template<class T>
@@ -126,6 +127,20 @@ namespace isl {
     template<class T>
     using remove_cv_t = typename remove_cv<T>::type;
 }
+
+// Primary type categories
+namespace isl {
+    template<class T>
+    struct is_void: isl::is_same<isl::remove_cv_t<T>, void> { };
+    template<class T>
+    inline constexpr bool is_void_v = is_void<T>::value;
+
+    template<class T>
+    struct is_null_pointer: isl::is_same<isl::remove_cv_t<T>, std::nullptr_t> { };
+    template<class T>
+    inline constexpr bool is_null_pointer_v = is_null_pointer<T>::value;
+}
+
 
 // Add cv
 namespace isl {
