@@ -264,7 +264,6 @@ namespace isl {
 
     template<class T>
     inline constexpr bool is_pointer_v = is_pointer<T>::value;
-
 }
 
 
@@ -341,7 +340,17 @@ namespace isl {
 
     template<class T>
     inline constexpr bool is_volatile_v = is_volatile<T>::value;
+}
 
+// Composite type categories
+namespace isl {
+    template<class T>
+    struct is_fundamental: isl::bool_constant<
+        isl::is_void_v<T> || isl::is_null_pointer_v<T> || isl::is_integral_v<T>
+    >{};
+
+    template<class T>
+    inline constexpr bool is_fundamental_v = is_fundamental<T>::value;
 }
 
 // Pointers
