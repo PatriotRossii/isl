@@ -253,7 +253,7 @@ namespace isl {
     namespace detail {
         template<class T>
         struct is_pointer: isl::false_type { };
-        template<>
+        template<class T>
         struct is_pointer<T*>: isl::true_type { };
     }
 
