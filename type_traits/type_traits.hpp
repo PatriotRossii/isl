@@ -40,26 +40,37 @@ namespace isl {
     inline constexpr bool is_same_v = is_same<T, U>::value;
 
     namespace detail {
-        template<class From, class To, bool is_noexcept>
-        To test_convertible() noexcept(is_noexcept) {
-            return std::declval<From>();
-        }
+        template<class To, bool is_noexcept>
+        auto test_returnable(int) -> decltype(
+            void(static_cast<To(*)() noexcept(is_noexcept)>(nullptr)), isl::true_type{} // nullptr - nullptr can be converted to any pointer type afaik
+        );
+        template<class, bool>
+        auto test_returnable(...) -> isl::false_type;
 
-        template<typename From, typename To, bool is_noexcept>
-        auto try_convert(int) -> is_same<decltype(test_convertible<From, To, is_noexcept>), decltype(test_convertible<From, To, is_noexcept>)>;
-        template<typename From, typename To>
-        auto try_convert(...) -> isl::false_type;
+        template<class From, class To, bool is_noexcept>
+        auto test_implicitly_convertible(int) -> decltype(
+            void(std::declval<void(*)(To) noexcept(is_noexcept)>()(std::declval<From>())),
+            std::true_type{}
+        );
+        template<class, class, bool>
+        auto test_implicitly_convertible(...) -> isl::false_type;
+
+        template<class From, class To, bool is_noexcept>
+        struct is_convertible: isl::bool_constant<
+            (decltype(detail::test_returnable<To>(0))::value 
+                && decltype(detail::test_implicitly_convertible<From, To, is_noexcept>(0))::value) ||
+            (isl::is_same_v<void, From> && isl::is_same_v<void, To>)
+        >{ };
     }
     template<class From, class To>
-    struct is_convertible: decltype(detail::try_convert<From, To, false>(0)) { };
+    struct is_convertible: detail::is_convertible<From, To, false> { };
     template<class From, class To>
     inline constexpr bool is_convertible_v = is_convertible<From, To>::value;
 
     template<class From, class To>
-    struct is_nothrow_convertible: decltype(detail::try_convert<From, To, true>(0)) { };
+    struct is_nothrow_convertible: detail::is_convertible<From, To, true> { };
     template<class From, class To>
     inline constexpr bool is_nothrow_convertible_v = is_nothrow_convertible<From, To>::value;
-
 }
 
 // Const-volatility specifiers
