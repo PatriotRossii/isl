@@ -340,6 +340,33 @@ namespace isl {
 
     template<class T>
     inline constexpr bool is_volatile_v = is_volatile<T>::value;
+
+    namespace detail {
+        template<typename T>
+        auto test_signed(int) -> isl::is_same<decltype(T(-1) < T(0)), bool>;
+        template<typename T>
+        auto test_signed(...) -> isl::false_type;
+    }
+
+    template<class T>
+    struct is_signed: decltype(detail::test_signed<T>(0)) { };
+
+    template<class T>
+    inline constexpr bool is_signed_v = is_signed<T>::value;
+
+    namespace detail {
+        template<typename T>
+        auto test_unsigned(int) -> isl::is_same<decltype(T(-1) > T(0)), bool>;
+        template<typename T>
+        auto test_unsigned(...) -> isl::false_type;
+    }
+
+    template<class T>
+    struct is_unsigned: decltype(detail::test_unsigned<T>(0)) { };
+
+    template<class T>
+    inline constexpr bool is_unsigned_v = is_unsigned<T>::value;
+
 }
 
 // Composite type categories
