@@ -1,3 +1,10 @@
+namespace isl {
+    template<class T>
+    struct type_identity {
+        using type = T;
+    };
+}
+
 // Helper classes
 namespace isl {
     template<class T, T v> struct integral_constant {
@@ -153,7 +160,6 @@ namespace isl {
     struct remove_pointer<T* const> {
         using type = T;
     };
-
     template<class T>
     using remove_pointer_t = typename remove_pointer<T>::type;
 }
