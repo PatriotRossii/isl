@@ -139,6 +139,60 @@ namespace isl {
     struct is_null_pointer: isl::is_same<isl::remove_cv_t<T>, std::nullptr_t> { };
     template<class T>
     inline constexpr bool is_null_pointer_v = is_null_pointer<T>::value;
+
+    // is_integral
+
+    namespace detail {
+        // int
+
+        template<class T>
+        struct is_integral: isl::false_type { };
+
+        template<>
+        struct is_integral<short int>: isl::true_type { };
+        template<>
+        struct is_integral<unsigned short int>: isl::true_type { };
+        template<>
+        struct is_integral<int>: isl::true_type { };
+        template<>
+        struct is_integral<unsigned int>: isl::true_type { }; 
+        template<>
+        struct is_integral<long int>: isl::true_type { };
+        template<>
+        struct is_integral<unsigned long int>: isl::true_type { }; 
+        template<>
+        struct is_integral<long long int>: isl::true_type { };
+        template<>
+        struct is_integral<unsigned long long int>: isl::true_type { };
+
+        // boolean
+
+        template<>
+        struct is_integral<bool>: isl::true_type { };
+
+        // character types
+
+        template<>
+        struct is_integral<signed char>: isl::true_type { };
+        template<>
+        struct is_integral<unsigned char>: isl::true_type { };
+        template<>
+        struct is_integral<wchar_t>: isl::true_type { };
+        template<>
+        struct is_integral<char16_t>: isl::true_type { };
+        template<>
+        struct is_integral<char32_t>: isl::true_type { };
+        template<>
+        struct is_integral<char8_t>: isl::true_type { };
+    }
+
+    template<class T>
+    struct is_integral: detail::is_integral<isl::remove_cv_t<T>> { };
+
+    // helper variable
+
+    template<class T>
+    inline constexpr bool is_integral_v = is_integral<T>::value;    
 }
 
 
