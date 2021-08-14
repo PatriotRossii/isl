@@ -28,6 +28,16 @@ namespace isl {
     using false_type = integral_constant<bool, false>;
 }
 
+// Type relationships
+namespace isl {
+    template<class T, class U>
+    struct is_same: isl::false_type {};
+    template<class T>
+    struct is_same<T, T>: isl::true_type {};
+    template<class T, class U>
+    inline constexpr bool is_same_v = is_same<T, U>::value;
+}
+
 // Const-volatility specifiers
 namespace isl {
     // remove_const
