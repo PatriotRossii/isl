@@ -7,6 +7,8 @@ namespace isl {
     struct type_identity {
         using type = T;
     };
+    template<class T>
+    using type_identity_t = typename type_identity<T>::type;
 }
 
 // Helper classes
