@@ -409,6 +409,18 @@ namespace isl {
 
     template<class T>
     inline constexpr bool is_reference_t = is_reference<T>::value;
+
+    namespace detail {
+        template<class T>
+        struct is_member_pointer: isl::false_type { };
+        template<class T, class U>
+        struct is_member_pointer<T U::*>: isl::false_type { };
+    }
+    template<class T>
+    struct is_member_pointer: detail::is_member_pointer<isl::remove_cv_t<T>> { };
+
+    template<class T>
+    inline constexpr bool is_member_pointer_t = is_member_pointer<T>::value;
 }
 
 // Pointers
