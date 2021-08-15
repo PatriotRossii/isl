@@ -211,8 +211,14 @@ namespace isl {
   using unwrap_reference_t = typename unwrap_reference<T>::type;
   template <class T>
   using unwrap_ref_decay_t = typename unwrap_ref_decay<T>::type;
-  template <class...>
-  using void_t = void;
+
+  namespace detail {
+  	template<class...>
+  	struct make_void;
+  }
+
+  template <class... Args>
+  using void_t = typename detail::make_void<Args...>::type;
  
   // logical operator traits:
   template <class... B> struct conjunction;

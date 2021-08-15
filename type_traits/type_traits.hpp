@@ -677,6 +677,35 @@ namespace isl {
         using type = isl::remove_cv_t<isl::remove_reference_t<T>>;
     };
 
+    // enable_if
+
+    template<bool B, class T>
+    struct enable_if { };
+    template<class T>
+    struct enable_if<true, T> {
+        using type = T;
+    };
+
+    // conditional
+
+    template<bool B, class T, class F>
+    struct conditional {
+        using type = T;
+    };
+    template<class T, class F>
+    struct conditional<false, T, F> {
+        using type = F;
+    };
+
+    // void_t
+
+    namespace detail {
+        template<class... T>
+        struct make_void {
+            using type = void;
+        };
+    }
+
     // type_identity
 
     template<class T>
