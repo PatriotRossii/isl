@@ -474,3 +474,40 @@ namespace isl {
     template<class T>
     using add_pointer_t = typename add_pointer<T>::type;
 }
+
+// Supported operations
+
+namespace isl {
+    namespace detail {
+        template<class T, class... Args>
+        auto test_constructible(int) -> decltype(
+            void(T(std::declval<Args>()...)),
+            std::true_type{}
+        );
+        template<class, class...>
+        auto test_constructible(...) -> std::false_type;
+
+        template<class T, class... Args>
+        auto test_nothrow_constructible(int) -> decltype(
+            std::bool_constant<
+                noexcept(T(std::declval<Args>()...))
+            >{}
+        );
+        template<class, class...>
+        auto test_nothrow_constructible(...) -> std::false_type;
+    }
+
+    template<class T, class... Args>
+    struct is_constructible:
+        decltype(detail::test_constructible<T, Args...>(0))
+    { };
+    template<class T, class... Args>
+    struct is_nothrow_constructible:
+        decltype(detail::test_nothrow_constructible<T, Args...>(0))
+    { };
+
+    template<class T, class... Args>
+    inline constexpr bool is_constructible_v = is_constructible<T, Args...>::value;
+    template<class T, class... Args>
+    inline constexpr bool is_nothrow_constructible_v = is_nothrow_constructible<T, Args...>::value;
+}
