@@ -382,6 +382,21 @@ namespace isl {
 
     template<class T>
     inline constexpr bool is_unbounded_array_v = is_unbounded_array<T>::value;
+
+    namespace detail {
+        template<typename T>
+        auto test_abstract(int) -> decltype(
+            void(static_cast<void(*)(T)>(nullptr)(std::declval<T>())), std::true_type{}
+        );
+        template<typename T>
+        auto test_abstract(...) -> std::false_type;
+    }
+
+    template<class T>
+    struct is_abstract: decltype(detail::test_abstract<T>(0)) { };
+
+    template<class T>
+    inline constexpr bool is_abstract_v = is_abstract<T>::value;
 }
 
 // Composite type categories
