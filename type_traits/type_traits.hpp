@@ -713,3 +713,39 @@ namespace isl {
         using type = T;
     };
 }
+
+// Operations on traits 
+namespace isl {
+    // conjunction
+
+    template<class...>
+    struct conjunction: isl::false_type { };
+
+    template<class A, class... B>
+    struct conjunction<A, B...>: isl::conditional_t<
+        bool(A::value == false), A, conjunction<B...>
+    > { };
+
+    template<class A>
+    struct conjunction<A>: A { };
+
+    // disjunction
+
+    template<class...>
+    struct disjunction: isl::false_type { };
+
+    template<class A, class... B>
+    struct disjunction<A, B...>: isl::conditional_t<
+        bool(A::value == true), A, disjunction<B...>
+    > { };
+
+    template<class A>
+    struct disjunction<A>: A { };
+
+    // negation
+
+    template<class B>
+    struct negation: std::bool_constant<
+        !bool(B::value)
+    > { };
+}
