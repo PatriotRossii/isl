@@ -423,7 +423,7 @@ namespace isl {
     >{};
 
     template<class T>
-    inline constexpr bool is_reference_t = is_reference<T>::value;
+    inline constexpr bool is_reference_v = is_reference<T>::value;
 
     namespace detail {
         template<class T>
@@ -593,4 +593,72 @@ namespace isl {
     inline constexpr bool is_move_assignable_v = is_move_assignable<T>::value;
     template<class T>
     inline constexpr bool is_nothrow_move_assignable_v = is_nothrow_move_assignable<T>::value;
+
+    namespace detail {
+        template<class T, class U>
+        auto test_swappable_with(int) -> decltype(
+            void(swap(std::declval<T>(), std::declval<U>()), swap(std::declval<U>(), std::declval<T>())),
+            isl::true_type{}
+        );
+        template<class, class>
+        auto test_swappable_with(...) -> isl::false_type;
+
+        template<class T, class U>
+        auto test_nothrow_swappable_with(int) -> decltype(
+            isl::bool_constant<
+                nothrow(swap(std::declval<T>(), std::declval<U>()), swap(std::declval<U>(), std::declval<T>()))
+            >{}
+        );
+        template<class, class>
+        auto test_nothrow_swappable_with(...) -> isl::false_type;
+
+        template<class T>
+        auto test_referenceable(int) -> decltype(
+            void(static_cast<T&(*)(void)>(nullptr)()),
+            isl::true_type{}
+        );
+        template<class T>
+        auto test_referenceable(...) -> isl::false_type;
+
+        template<class T>
+        struct is_referenceable: decltype(
+            test_referenceable<T>(0)
+        ) { };
+
+        template<class T>
+        inline constexpr bool is_referenceable_v = is_reference<T>::value;
+    }
+
+    template<class T, class U>
+    struct is_swappable_with: decltype(
+        detail::test_swappable_with<T, U>(0)
+    ) { };
+    template<class T>
+    struct is_swappable: decltype(
+        isl::bool_constant<
+            detail::is_referenceable_v<T> &&
+                is_swappable_with<T&, T&>::value // short-circuit evaluation will return false if T is not a reference
+        >()
+    ) { };
+
+    template<class T, class U>
+    struct is_nothrow_swappable_with: decltype(
+        detail::test_nothrow_swappable_with<T, U>(0)
+    ) { };
+    template<class T>
+    struct is_nothrow_swappable: decltype(
+        isl::bool_constant<
+            detail::is_referenceable_v<T> &&
+                is_nothrow_swappable_with<T&, T&>::value // short-circuit evaluation will return false if T is not a reference
+        >()
+    ) { };
+
+    template<class T, class U>
+    inline constexpr bool is_swappable_with_v = is_swappable_with<T, U>::value;
+    template<class T>
+    inline constexpr bool is_swappable_v = is_swappable<T>::value;
+    template<class T, class U>
+    inline constexpr bool is_nothrow_swappable_with_v = is_nothrow_swappable_with<T, U>::value;
+    template<class T>
+    inline constexpr bool is_nothrow_swappable_v = is_nothrow_swappable<T>::value;
 }
