@@ -401,6 +401,14 @@ namespace isl {
 
     template<class T>
     inline constexpr bool is_arithmetic_v = is_arithmetic<T>::value;
+
+    template<class T>
+    struct is_reference: isl::bool_constant<
+        isl::is_lvalue_reference_t<T> || isl::is_rvalue_reference_t<T>
+    >{};
+
+    template<class T>
+    inline constexpr bool is_reference_t = is_reference<T>::value;
 }
 
 // Pointers
