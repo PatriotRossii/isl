@@ -104,6 +104,13 @@ namespace isl {
     template<class T, std::size_t N>
     struct is_array<T[N]>: isl::true_type { };
 
+    // is_function
+
+    template<class T>
+    struct is_function: isl::bool_constant<
+        !isl::is_const_v<const T> && !isl::is_reference_v<T>
+    > { };
+
     // std::is_lvalue_reference
 
     template<class T>
@@ -127,6 +134,20 @@ namespace isl {
 
     template<class T>
     struct is_pointer: detail::is_pointer<isl::remove_cv_t<T>> { };
+
+    // is_member_object_pointer
+
+    template<class T>
+    struct is_member_object_pointer: isl::bool_constant<
+        !isl::is_function_v<T> && isl::is_member_pointer_v<T>
+    > { };
+
+    // is_member_function_pointer
+
+    template<class T>
+    struct is_member_function_pointer: isl::bool_constant<
+        isl::is_function_v<T> && isl::is_member_pointer_v<T>
+    > { };
 }
 
 // Composite type categories
