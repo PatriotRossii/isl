@@ -1,15 +1,14 @@
 #include <utility> // std::declval
 #include <cstddef> // std::nullptr_t
 
+#include "synopsis.hpp"
+
 // Miscellaneous transformations
 namespace isl {
     template<class T>
     struct type_identity {
         using type = T;
     };
-
-    template<class T>
-    using type_identity_t = typename type_identity<T>::type;
 }
 
 // Helper classes
@@ -28,11 +27,6 @@ namespace isl {
             return value;
         }
     };
-    template <bool B>
-    using bool_constant = integral_constant<bool, B>;
-
-    using true_type = integral_constant<bool, true>;
-    using false_type = integral_constant<bool, false>;
 }
 
 // Type relationships
@@ -41,8 +35,6 @@ namespace isl {
     struct is_same: isl::false_type {};
     template<class T>
     struct is_same<T, T>: isl::true_type {};
-    template<class T, class U>
-    inline constexpr bool is_same_v = is_same<T, U>::value;
 
     namespace detail {
         template<class To, bool is_noexcept>
@@ -69,13 +61,9 @@ namespace isl {
     }
     template<class From, class To>
     struct is_convertible: detail::is_convertible<From, To, false> { };
-    template<class From, class To>
-    inline constexpr bool is_convertible_v = is_convertible<From, To>::value;
 
     template<class From, class To>
     struct is_nothrow_convertible: detail::is_convertible<From, To, true> { };
-    template<class From, class To>
-    inline constexpr bool is_nothrow_convertible_v = is_nothrow_convertible<From, To>::value;
 }
 
 // Const-volatility specifiers
@@ -91,9 +79,6 @@ namespace isl {
         using type = T;
     };
 
-    template<class T>
-    using remove_const_t = typename remove_const<T>::type;
-
     // remove_volatile
 
     template<class T>
@@ -104,9 +89,6 @@ namespace isl {
     struct remove_volatile<volatile T> {
         using type = T;
     };
-
-    template<class T>
-    using remove_volatile_t = typename remove_volatile<T>::type;
 
     // remove_cv
 
@@ -127,22 +109,15 @@ namespace isl {
     struct remove_cv<const T> {
         using type = T;
     };
-
-    template<class T>
-    using remove_cv_t = typename remove_cv<T>::type;
 }
 
 // Primary type categories
 namespace isl {
     template<class T>
     struct is_void: isl::is_same<isl::remove_cv_t<T>, void> { };
-    template<class T>
-    inline constexpr bool is_void_v = is_void<T>::value;
 
     template<class T>
     struct is_null_pointer: isl::is_same<isl::remove_cv_t<T>, std::nullptr_t> { };
-    template<class T>
-    inline constexpr bool is_null_pointer_v = is_null_pointer<T>::value;
 
     // is_integral
 
@@ -193,11 +168,6 @@ namespace isl {
     template<class T>
     struct is_integral: detail::is_integral<isl::remove_cv_t<T>> { };
 
-    // helper variable
-
-    template<class T>
-    inline constexpr bool is_integral_v = is_integral<T>::value;
-
     // is_floating_point
 
     namespace detail {
@@ -215,11 +185,6 @@ namespace isl {
     template<class T>
     struct is_floating_point: detail::is_floating_point<isl::remove_cv_t<T>> { };
 
-    // helper variable
-
-    template<class T>
-    inline constexpr bool is_floating_point_v = is_floating_point<T>::value;
-
     // is_array
 
     template<class T>
@@ -229,11 +194,6 @@ namespace isl {
     template<class T, std::size_t N>
     struct is_array<T[N]>: isl::true_type { };
 
-    // helper varialbe
-
-    template<class T>
-    inline constexpr bool is_array_v = is_array<T>::value;
-
     // std::is_lvalue_reference
 
     template<class T>
@@ -242,15 +202,9 @@ namespace isl {
     struct is_lvalue_reference<T&>: isl::true_type { };
 
     template<class T>
-    inline constexpr bool is_lvalue_reference_t = is_lvalue_reference<T>::value;
-
-    template<class T>
     struct is_rvalue_reference: isl::false_type { };
     template<class T>
     struct is_rvalue_reference<T&&>: isl::true_type { };
-
-    template<class T>
-    inline constexpr bool is_rvalue_reference_t = is_rvalue_reference<T>::value;
 
     // std::is_pointer
 
@@ -263,11 +217,6 @@ namespace isl {
 
     template<class T>
     struct is_pointer: detail::is_pointer<isl::remove_cv_t<T>> { };
-
-    // helper variable
-
-    template<class T>
-    inline constexpr bool is_pointer_v = is_pointer<T>::value;
 }
 
 
@@ -303,8 +252,6 @@ namespace isl {
     struct remove_reference<T&&> {
         using type = T;
     };
-    template<class T>
-    using remove_reference_t = typename remove_reference<T>::type;
 
     template<class T>
     struct add_lvalue_reference {
@@ -314,8 +261,6 @@ namespace isl {
     struct add_lvalue_reference<void> {
         using type = void;
     };
-    template<class T>
-    using add_lvalue_reference_t = typename add_lvalue_reference<T>::type;
 
     template<class T>
     struct add_rvalue_reference {
@@ -325,8 +270,6 @@ namespace isl {
     struct add_rvalue_reference<void> {
         using type = void;
     };
-    template<class T>
-    using add_rvalue_reference_t = typename add_rvalue_reference<T>::type;
 }
 
 // Type properties
@@ -337,15 +280,9 @@ namespace isl {
     struct is_const<const T>: isl::true_type { };
 
     template<class T>
-    inline constexpr bool is_const_v = is_const<T>::value;
-
-    template<class T>
     struct is_volatile: isl::false_type { };
     template<class T>
     struct is_volatile<volatile T>: isl::true_type { };
-
-    template<class T>
-    inline constexpr bool is_volatile_v = is_volatile<T>::value;
 
     namespace detail {
         template<typename T>
@@ -356,9 +293,6 @@ namespace isl {
 
     template<class T>
     struct is_signed: decltype(detail::test_signed<T>(0)) { };
-
-    template<class T>
-    inline constexpr bool is_signed_v = is_signed<T>::value;
 
     namespace detail {
         template<typename T>
@@ -371,23 +305,14 @@ namespace isl {
     struct is_unsigned: decltype(detail::test_unsigned<T>(0)) { };
 
     template<class T>
-    inline constexpr bool is_unsigned_v = is_unsigned<T>::value;
-
-    template<class T>
     struct is_bounded_array: isl::false_type { };
     template<class T, size_t N>
     struct is_bounded_array<T[N]>: isl::true_type { };
 
     template<class T>
-    inline constexpr bool is_bounded_array_v = is_bounded_array<T>::value;
-
-    template<class T>
     struct is_unbounded_array: isl::false_type { };
     template<class T>
     struct is_unbounded_array<T[]>: isl::true_type { };
-
-    template<class T>
-    inline constexpr bool is_unbounded_array_v = is_unbounded_array<T>::value;
 
     namespace detail {
         template<typename T>
@@ -400,9 +325,6 @@ namespace isl {
 
     template<class T>
     struct is_abstract: decltype(detail::test_abstract<T>(0)) { };
-
-    template<class T>
-    inline constexpr bool is_abstract_v = is_abstract<T>::value;
 }
 
 // Composite type categories
@@ -413,23 +335,14 @@ namespace isl {
     >{};
 
     template<class T>
-    inline constexpr bool is_fundamental_v = is_fundamental<T>::value;
-
-    template<class T>
     struct is_arithmetic: isl::bool_constant<
         isl::is_integral_v<T> || isl::is_floating_point_v<T>
     >{};
 
     template<class T>
-    inline constexpr bool is_arithmetic_v = is_arithmetic<T>::value;
-
-    template<class T>
     struct is_reference: isl::bool_constant<
-        isl::is_lvalue_reference_t<T> || isl::is_rvalue_reference_t<T>
+        isl::is_lvalue_reference_v<T> || isl::is_rvalue_reference_v<T>
     >{};
-
-    template<class T>
-    inline constexpr bool is_reference_v = is_reference<T>::value;
 
     namespace detail {
         template<class T>
@@ -439,9 +352,6 @@ namespace isl {
     }
     template<class T>
     struct is_member_pointer: detail::is_member_pointer<isl::remove_cv_t<T>> { };
-
-    template<class T>
-    inline constexpr bool is_member_pointer_t = is_member_pointer<T>::value;
 }
 
 // Pointers
@@ -466,8 +376,6 @@ namespace isl {
     struct remove_pointer<T* const> {
         using type = T;
     };
-    template<class T>
-    using remove_pointer_t = typename remove_pointer<T>::type;
 
     namespace detail {
         template<typename T>
@@ -477,8 +385,6 @@ namespace isl {
     }
     template<class T>
     struct add_pointer: decltype(detail::try_add_pointer<T>(0)) { };
-    template<class T>
-    using add_pointer_t = typename add_pointer<T>::type;
 }
 
 // Supported operations
@@ -512,20 +418,10 @@ namespace isl {
         decltype(detail::test_nothrow_constructible<T, Args...>(0))
     { };
 
-    template<class T, class... Args>
-    inline constexpr bool is_constructible_v = is_constructible<T, Args...>::value;
-    template<class T, class... Args>
-    inline constexpr bool is_nothrow_constructible_v = is_nothrow_constructible<T, Args...>::value;
-
     template<class T>
     struct is_default_constructible: isl::is_constructible<T> { };
     template<class T>
     struct is_nothrow_default_constructible: isl::is_nothrow_constructible<T> { };
-
-    template<class T>
-    inline constexpr bool is_default_constructible_v = is_default_constructible<T>::value;
-    template<class T>
-    inline constexpr bool is_nothrow_default_constructible_v = is_nothrow_default_constructible<T>::value;
 
     template<class T>
     struct is_copy_constructible: isl::is_constructible<T, const T&> { };
@@ -533,19 +429,9 @@ namespace isl {
     struct is_nothrow_copy_constructible: isl::is_nothrow_constructible<T, const T&> { };
 
     template<class T>
-    inline constexpr bool is_copy_constructible_v = is_copy_constructible<T>::value;
-    template<class T>
-    inline constexpr bool is_nothrow_copy_constructible_v = is_nothrow_copy_constructible<T>::value;
-
-    template<class T>
     struct is_move_constructible: isl::is_constructible<T, T&&> { };
     template<class T>
     struct is_nothrow_move_constructible: isl::is_nothrow_constructible<T, T&&> { };
-
-    template<class T>
-    inline constexpr bool is_move_constructible_v = is_move_constructible<T>::value;
-    template<class T>
-    inline constexpr bool is_nothrow_move_constructible_v = is_nothrow_move_constructible<T>::value;
 
     namespace detail {
         template<class T, class U>
@@ -575,30 +461,15 @@ namespace isl {
         decltype(detail::test_nothrow_assignable<T, U>(0))
     { };
 
-    template<class T, class U>
-    inline constexpr bool is_assignable_v = is_assignable<T, U>::value;
-    template<class T, class U>
-    inline constexpr bool is_nothrow_assignable_v = is_nothrow_assignable<T, U>::value;
-
     template<class T>
     struct is_copy_assignable: isl::is_assignable<T, const T&> { };
     template<class T>
     struct is_nothrow_copy_assignable: isl::is_nothrow_assignable<T, const T&> { };
 
     template<class T>
-    inline constexpr bool is_copy_assignable_v = is_copy_assignable<T>::value;
-    template<class T>
-    inline constexpr bool is_nothrow_copy_assignable_v = is_nothrow_copy_assignable<T>::value;
-
-    template<class T>
     struct is_move_assignable: isl::is_assignable<T, T&&> { };
     template<class T>
     struct is_nothrow_move_assignable: isl::is_nothrow_assignable<T, T&&> { };
-
-    template<class T>
-    inline constexpr bool is_move_assignable_v = is_move_assignable<T>::value;
-    template<class T>
-    inline constexpr bool is_nothrow_move_assignable_v = is_nothrow_move_assignable<T>::value;
 
     namespace detail {
         template<class T, class U>
@@ -630,9 +501,8 @@ namespace isl {
         struct is_referenceable: decltype(
             test_referenceable<T>(0)
         ) { };
-
-        template<class T>
-        inline constexpr bool is_referenceable_v = is_reference<T>::value;
+        template<typename T>
+        inline constexpr bool is_referenceable_v = is_referenceable<T>::value;
     }
 
     template<class T, class U>
@@ -658,24 +528,12 @@ namespace isl {
                 is_nothrow_swappable_with<T&, T&>::value // short-circuit evaluation will return false if T is not a reference
         >()
     ) { };
-
-    template<class T, class U>
-    inline constexpr bool is_swappable_with_v = is_swappable_with<T, U>::value;
-    template<class T>
-    inline constexpr bool is_swappable_v = is_swappable<T>::value;
-    template<class T, class U>
-    inline constexpr bool is_nothrow_swappable_with_v = is_nothrow_swappable_with<T, U>::value;
-    template<class T>
-    inline constexpr bool is_nothrow_swappable_v = is_nothrow_swappable<T>::value;
 }
 
 // Property queries
 namespace isl {
     template<class T>
     struct alignment_of: isl::integral_constant<size_t, alignof(T)> { };
-    
-    template< class T >
-    inline constexpr size_t alignment_of_v = alignment_of<T>::value;
 
     template<class T>
     struct rank: isl::integral_constant<
@@ -690,10 +548,7 @@ namespace isl {
         size_t, rank<T>::value + 1
     > { };
 
-    template<class T>
-    inline constexpr size_t rank_v = rank<T>::value;
-
-    template<class T, unsigned int N = 0>
+    template<class T, unsigned int I>
     struct extent: isl::integral_constant<
         size_t, 0
     > { };
@@ -702,18 +557,15 @@ namespace isl {
         size_t, 0
     > { };
 
-    template<class T, unsigned int N>
-    struct extent<T[], N>: extent<T, N - 1> { };
-    template<class T, unsigned int N, size_t SIZE>
-    struct extent<T[SIZE], N>: extent<T, N - 1> { };
+    template<class T, unsigned int I>
+    struct extent<T[], I>: extent<T, I - 1> { };
+    template<class T, unsigned int I, size_t SIZE>
+    struct extent<T[SIZE], I>: extent<T, I - 1> { };
 
     template<class T, size_t SIZE>
     struct extent<T[SIZE], 0>: isl::integral_constant<
         size_t, SIZE
     > { };
-
-    template<class T, unsigned N = 0>
-    inline constexpr std::size_t extent_v = extent<T, N>::value;
 }
 
 // Array
@@ -732,9 +584,6 @@ namespace isl {
     };
 
     template<class T>
-    using remove_extent_t = typename remove_extent<T>::type;
-
-    template<class T>
     struct remove_all_extents {
         using type = T;
     };
@@ -743,9 +592,6 @@ namespace isl {
     struct remove_all_extents<T[]>: remove_extent<T> { };
     template<class T, size_t I>
     struct remove_all_extents<T[I]>: remove_extent<T> { };
-
-    template<class T>
-    using remove_all_extents_t = typename remove_all_extents<T>::type;
 }
 
 namespace isl {
@@ -753,7 +599,4 @@ namespace isl {
     struct remove_cvref {
         using type = isl::remove_cv_t<isl::remove_reference_t<T>>;
     };
-
-    template<class T>
-    using remove_cvref_t = typename remove_cvref<T>::type;
 }
