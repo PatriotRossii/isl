@@ -662,3 +662,50 @@ namespace isl {
     template<class T>
     inline constexpr bool is_nothrow_swappable_v = is_nothrow_swappable<T>::value;
 }
+
+// Property queries
+namespace isl {
+    template<class T>
+    struct alignment_of: isl::integral_constant<size_t, alignof(T)> { };
+    
+    template< class T >
+    inline constexpr size_t alignment_of_v = alignment_of<T>::value;
+
+    template<class T>
+    struct rank: isl::integral_constant<
+        size_t, 0
+    > { };
+    template<class T>
+    struct rank<T[]>: isl::integral_constant<
+        size_t, rank<T>::value + 1
+    > { };
+    template<class T, size_t N>
+    struct rank<T[N]>: isl::integral_constant<
+        size_t, rank<T>::value + 1
+    > { };
+
+    template<class T>
+    inline constexpr size_t rank_v = rank<T>::value;
+
+    template<class T, unsigned int N = 0>
+    struct extent: isl::integral_constant<
+        size_t, 0
+    > { };
+    template<class T>
+    struct extent<T[], 0>: isl::integral_constant<
+        size_t, 0
+    > { };
+
+    template<class T, unsigned int N>
+    struct extent<T[], N>: extent<T, N - 1> { };
+    template<class T, unsigned int N, size_t SIZE>
+    struct extent<T[SIZE], N>: extent<T, N - 1> { };
+
+    template<class T, size_t SIZE>
+    struct extent<T[SIZE], 0>: isl::integral_constant<
+        size_t, SIZE
+    > { };
+
+    template<class T, unsigned N = 0>
+    inline constexpr std::size_t extent_v = extent<T, N>::value;
+}
