@@ -1,6 +1,7 @@
 #include <utility> // std::declval
 #include <cstddef> // std::nullptr_t
 
+// Miscellaneous transformations
 namespace isl {
     template<class T>
     struct type_identity {
@@ -708,4 +709,36 @@ namespace isl {
 
     template<class T, unsigned N = 0>
     inline constexpr std::size_t extent_v = extent<T, N>::value;
+}
+
+// Array
+namespace isl {
+    template<class T>
+    struct remove_extent {
+        using type = T;
+    };
+    template<class T>
+    struct remove_extent<T[]> {
+        using type = T;
+    };
+    template<class T, size_t I>
+    struct remove_extent<T[I]> {
+        using type = T;
+    };
+
+    template<class T>
+    using remove_extent_t = typename remove_extent<T>::type;
+
+    template<class T>
+    struct remove_all_extents {
+        using type = T;
+    };
+    
+    template<class T>
+    struct remove_all_extents<T[]>: remove_extent<T> { };
+    template<class T, size_t I>
+    struct remove_all_extents<T[I]>: remove_extent<T> { };
+
+    template<class T>
+    using remove_all_extents_t = typename remove_all_extents<T>::type;
 }
