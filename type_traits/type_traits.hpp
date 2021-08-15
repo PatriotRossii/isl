@@ -7,6 +7,7 @@ namespace isl {
     struct type_identity {
         using type = T;
     };
+
     template<class T>
     using type_identity_t = typename type_identity<T>::type;
 }
@@ -302,6 +303,8 @@ namespace isl {
     struct remove_reference<T&&> {
         using type = T;
     };
+    template<class T>
+    using remove_reference_t = typename remove_reference<T>::type;
 
     template<class T>
     struct add_lvalue_reference {
@@ -743,4 +746,14 @@ namespace isl {
 
     template<class T>
     using remove_all_extents_t = typename remove_all_extents<T>::type;
+}
+
+namespace isl {
+    template<class T>
+    struct remove_cvref {
+        using type = isl::remove_cv_t<isl::remove_reference_t<T>>;
+    };
+
+    template<class T>
+    using remove_cvref_t = typename remove_cvref<T>::type;
 }
