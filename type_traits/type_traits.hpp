@@ -510,4 +510,14 @@ namespace isl {
     inline constexpr bool is_constructible_v = is_constructible<T, Args...>::value;
     template<class T, class... Args>
     inline constexpr bool is_nothrow_constructible_v = is_nothrow_constructible<T, Args...>::value;
+
+    template<class T>
+    struct is_default_constructible: isl::is_constructible<T> { };
+    template<class T>
+    struct is_nothrow_default_constructible: isl::is_nothrow_constructible<T> { };
+
+    template<class T>
+    inline constexpr bool is_default_constructible_v = is_default_constructible<T>::value;
+    template<class T>
+    inline constexpr bool is_nothrow_default_constructible_v = is_nothrow_default_constructible<T>::value;
 }
