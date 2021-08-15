@@ -540,4 +540,57 @@ namespace isl {
     inline constexpr bool is_move_constructible_v = is_move_constructible<T>::value;
     template<class T>
     inline constexpr bool is_nothrow_move_constructible_v = is_nothrow_move_constructible<T>::value;
+
+    namespace detail {
+        template<class T, class U>
+        auto test_assignable(int) -> decltype(
+            void(std::declval<T> = std::declval<U>),
+            std::true_type{}
+        );
+        template<class, class>
+        auto test_assignable(...) -> std::false_type;
+
+        template<class T, class U>
+        auto test_nothrow_assignable(int) -> decltype(
+            std::bool_constant<
+                noexcept(std::declval<T> = std::declval<U>)
+            >{}
+        );
+        template<class, class>
+        auto test_nothrow_assignable(...) -> std::false_type;
+    }
+
+    template<class T, class U>
+    struct is_assignable:
+        decltype(detail::test_assignable<T, U>(0))
+    { };
+    template<class T, class U>
+    struct is_nothrow_assignable:
+        decltype(detail::test_nothrow_assignable<T, U>(0))
+    { };
+
+    template<class T, class U>
+    inline constexpr bool is_assignable_v = is_assignable<T, U>::value;
+    template<class T, class U>
+    inline constexpr bool is_nothrow_assignable_v = is_nothrow_assignable<T, U>::value;
+
+    template<class T>
+    struct is_copy_assignable: isl::is_assignable<T, const T&> { };
+    template<class T>
+    struct is_nothrow_copy_assignable: isl::is_nothrow_assignable<T, const T&> { };
+
+    template<class T>
+    inline constexpr bool is_copy_assignable_v = is_copy_assignable<T>::value;
+    template<class T>
+    inline constexpr bool is_nothrow_copy_assignable_v = is_nothrow_copy_assignable<T>::value;
+
+    template<class T>
+    struct is_move_assignable: isl::is_assignable<T, T&&> { };
+    template<class T>
+    struct is_nothrow_move_assignable: isl::is_nothrow_assignable<T, T&&> { };
+
+    template<class T>
+    inline constexpr bool is_move_assignable_v = is_move_assignable<T>::value;
+    template<class T>
+    inline constexpr bool is_nothrow_move_assignable_v = is_nothrow_move_assignable<T>::value;
 }
