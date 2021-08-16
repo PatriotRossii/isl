@@ -280,7 +280,7 @@ namespace isl {
             >{}
         );
         template<class, class...>
-        auto test_nothrow_constructible(...) -> std::false_type;
+        auto test_nothrow_constructible(...) -> isl::false_type;
     }
 
     template<class T, class... Args>
@@ -327,19 +327,19 @@ namespace isl {
         template<class T, class U>
         auto test_assignable(int) -> decltype(
             void(std::declval<T>() = std::declval<U>()),
-            std::true_type{}
+            isl::true_type{}
         );
         template<class, class>
-        auto test_assignable(...) -> std::false_type;
+        auto test_assignable(...) -> isl::false_type;
 
         template<class T, class U>
         auto test_nothrow_assignable(int) -> decltype(
-            std::bool_constant<
+            isl::bool_constant<
                 noexcept(std::declval<T>() = std::declval<U>())
             >{}
         );
         template<class, class>
-        auto test_nothrow_assignable(...) -> std::false_type;
+        auto test_nothrow_assignable(...) -> isl::false_type;
     }
 
     template<class T, class U>
@@ -501,7 +501,7 @@ namespace isl {
         template<class From, class To, bool is_noexcept>
         auto test_implicitly_convertible(int) -> decltype(
             void(std::declval<void(*)(To) noexcept(is_noexcept)>()(std::declval<From>())),
-            std::true_type{}
+            isl::true_type{}
         );
         template<class, class, bool>
         auto test_implicitly_convertible(...) -> isl::false_type;
@@ -770,7 +770,7 @@ namespace isl {
     // negation
 
     template<class B>
-    struct negation: std::bool_constant<
+    struct negation: isl::bool_constant<
         !bool(B::value)
     > { };
 }
