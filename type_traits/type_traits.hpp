@@ -205,7 +205,9 @@ namespace isl {
 
     namespace detail {
         template<typename T>
-        auto test_signed(int) -> isl::is_same<decltype(T(-1) < T(0)), bool>;
+        auto test_signed(int) -> decltype(bool_constant<
+            (T(-1) < T(0)) && std::is_arithmetic_v<T> 
+        >{});
         template<typename T>
         auto test_signed(...) -> isl::false_type;
     }
@@ -217,7 +219,9 @@ namespace isl {
 
     namespace detail {
         template<typename T>
-        auto test_unsigned(int) -> isl::is_same<decltype(T(-1) > T(0)), bool>;
+        auto test_unsigned(int) -> decltype(bool_constant<
+            /* T(-1) > T(0) -- funny */ (T(0) < T(-1)) && std::is_arithmetic_v<T> 
+        >{});
         template<typename T>
         auto test_unsigned(...) -> isl::false_type;
     }
