@@ -356,18 +356,18 @@ namespace isl {
     */
 
     template<class T>
-    struct is_copy_assignable: isl::is_assignable<T, const T&> { };
+    struct is_copy_assignable: isl::is_assignable<T&, const T&> { };
     template<class T>
-    struct is_nothrow_copy_assignable: isl::is_nothrow_assignable<T, const T&> { };
+    struct is_nothrow_copy_assignable: isl::is_nothrow_assignable<T&, const T&> { };
 
     /*
         is_move_assignable, is_nothrow_move_assignable
     */
 
     template<class T>
-    struct is_move_assignable: isl::is_assignable<T, T&&> { };
+    struct is_move_assignable: isl::is_assignable<T&, T&&> { };
     template<class T>
-    struct is_nothrow_move_assignable: isl::is_nothrow_assignable<T, T&&> { };
+    struct is_nothrow_move_assignable: isl::is_nothrow_assignable<T&, T&&> { };
 
     /*
         is_swappable_with, is_swappable,
