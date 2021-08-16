@@ -248,10 +248,10 @@ namespace isl {
     namespace detail {
         template<typename T>
         auto test_abstract(int) -> decltype(
-            void(static_cast<void(*)(T)>(nullptr)(std::declval<T>())), std::true_type{}
+            void(static_cast<void(*)(T)>(nullptr)(std::declval<T>())), std::false_type{}
         );
         template<typename T>
-        auto test_abstract(...) -> std::false_type;
+        auto test_abstract(...) -> std::true_type;
     }
 
     template<class T>
