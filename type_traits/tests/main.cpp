@@ -323,13 +323,13 @@ namespace IsDefaultConstructible {
 }
 
 TEST(type_traits, TestIsDefaultConstructible) {
-    constexpr bool value_1 = std::is_default_constructible<IsDefaultConstructible::Ex1>::value;
+    constexpr bool value_1 = isl::is_default_constructible<IsDefaultConstructible::Ex1>::value;
     ASSERT_TRUE(value_1);
 
-    constexpr bool value_2 = std::is_nothrow_default_constructible<IsDefaultConstructible::Ex2>::value;
+    constexpr bool value_2 = isl::is_nothrow_default_constructible<IsDefaultConstructible::Ex2>::value;
     ASSERT_TRUE(value_2);
 
-    constexpr bool value_3 = std::is_default_constructible<IsDefaultConstructible::Ex3>::value;
+    constexpr bool value_3 = isl::is_default_constructible<IsDefaultConstructible::Ex3>::value;
     ASSERT_FALSE(value_3);
 }
 
@@ -347,13 +347,13 @@ namespace IsCopyConstructible {
 }
 
 TEST(type_traits, TestIsCopyConstructible) {
-    constexpr bool value_1 = std::is_copy_constructible<IsCopyConstructible::Ex1>::value;
+    constexpr bool value_1 = isl::is_copy_constructible<IsCopyConstructible::Ex1>::value;
     ASSERT_TRUE(value_1);
 
-    constexpr bool value_2 = std::is_nothrow_copy_constructible<IsCopyConstructible::Ex2>::value;
+    constexpr bool value_2 = isl::is_nothrow_copy_constructible<IsCopyConstructible::Ex2>::value;
     ASSERT_TRUE(value_2);
 
-    constexpr bool value_3 = std::is_copy_constructible<IsCopyConstructible::Ex3>::value;
+    constexpr bool value_3 = isl::is_copy_constructible<IsCopyConstructible::Ex3>::value;
     ASSERT_FALSE(value_3);
 }
 
@@ -374,20 +374,72 @@ namespace IsMoveConstructible {
 }
 
 TEST(type_traits, TestIsMoveConstructible) {
-    constexpr bool value_1 = std::is_move_constructible<IsMoveConstructible::Ex1>::value;
+    constexpr bool value_1 = isl::is_move_constructible<IsMoveConstructible::Ex1>::value;
     ASSERT_TRUE(value_1);
 
-    constexpr bool value_2 = std::is_nothrow_move_constructible<IsMoveConstructible::Ex2>::value;
+    constexpr bool value_2 = isl::is_nothrow_move_constructible<IsMoveConstructible::Ex2>::value;
     ASSERT_TRUE(value_2);
 
-    constexpr bool value_3 = std::is_move_constructible<IsMoveConstructible::Ex3>::value;
+    constexpr bool value_3 = isl::is_move_constructible<IsMoveConstructible::Ex3>::value;
     ASSERT_TRUE(value_3);
 
-    constexpr bool value_4 = std::is_move_constructible<IsMoveConstructible::NoMove>::value;
-    constexpr bool value_5 = std::is_nothrow_move_constructible<IsMoveConstructible::NoMove>::value;
-    
+    constexpr bool value_4 = isl::is_move_constructible<IsMoveConstructible::NoMove>::value;
+    constexpr bool value_5 = isl::is_nothrow_move_constructible<IsMoveConstructible::NoMove>::value;
+
     ASSERT_FALSE(value_4);
     ASSERT_FALSE(value_5);
+}
+
+namespace IsAssignable {
+    struct Foo {
+        int n;
+    };
+}
+
+TEST(type_traits, TestIsAssignable) {
+    constexpr bool int_int = isl::is_assignable<int, int>::value;
+    ASSERT_FALSE(int_int);
+
+    constexpr bool int_ref_int = isl::is_assignable<int&, int>::value;
+    ASSERT_TRUE(int_ref_int);
+
+    constexpr bool int_double = isl::is_assignable<int, double>::value;
+    ASSERT_FALSE(int_double);
+
+    constexpr bool int_ref_double = isl::is_nothrow_assignable<int&, double>::value;
+    ASSERT_TRUE(int_ref_double);
+
+    constexpr bool string_double = isl::is_assignable<std::string, double>::value;
+    ASSERT_TRUE(string_double);
+
+    constexpr bool foo_ref_foo = isl::is_assignable<IsAssignable::Foo&, const IsAssignable::Foo&>::value;
+    ASSERT_TRUE(foo_ref_foo);
+}
+
+TEST(type_traits, TestIsCopyAssignable) {
+    ASSERT_TRUE(isl::is_copy_assignable_v<IsAssignable::Foo>);
+    ASSERT_FALSE(isl::is_copy_assignable_v<int[2]>);
+
+    ASSERT_TRUE(isl::is_copy_assignable_v<int>);
+    ASSERT_TRUE(isl::is_nothrow_copy_assignable_v<int>);
+}
+
+namespace IsMoveAssignable {
+    struct NoMove {
+        // prevents implicit declaration of default move assignment operator
+        // however, the class is still move-assignable because its
+        // copy assignment operator can bind to an rvalue argument
+        NoMove& operator=(const NoMove&) { return *this; }
+    };
+}
+
+TEST(type_traits, TestIsMoveAssignable) {
+    ASSERT_TRUE(isl::is_nothrow_move_assignable<std::string>::value);
+    ASSERT_FALSE(isl::is_move_assignable<int[2]>::value);
+    ASSERT_TRUE(isl::is_move_assignable<IsAssignable::Foo>::value);
+ 
+    ASSERT_TRUE(isl::is_move_assignable<IsMoveAssignable::NoMove>::value);
+    ASSERT_FALSE(isl::is_nothrow_move_assignable<IsMoveAssignable::NoMove>::value);
 }
 
 int main(int argc, char *argv[]) {
