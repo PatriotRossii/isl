@@ -282,6 +282,114 @@ TEST(type_traits, TestIsUnboundedArray) {
     ASSERT_FALSE(isl::is_unbounded_array_v<int[3]>);
 }
 
+namespace IsConstructible {
+    class C { };
+    class Foo {
+        int v1;
+        double v2;
+    public:
+        Foo(int n) : v1(n), v2() {}
+        Foo(int n, double f) noexcept : v1(n), v2(f) {}
+    };
+}
+
+TEST(type_traits, TestIsConstructible) {
+    constexpr bool value_1 = isl::is_constructible_v<IsConstructible::Foo, const IsConstructible::Foo&>;
+    constexpr bool value_2 = isl::is_constructible_v<IsConstructible::Foo, int>;
+
+    ASSERT_TRUE(value_1);
+    ASSERT_TRUE(value_2);
+
+    constexpr bool value_3 = isl::is_constructible_v<IsConstructible::Foo, IsConstructible::C>;
+    constexpr bool value_4 = isl::is_nothrow_constructible_v<IsConstructible::Foo, int>;
+    constexpr bool value_5 = isl::is_nothrow_constructible_v<IsConstructible::Foo, int, double>;
+
+    ASSERT_FALSE(value_3);
+    ASSERT_FALSE(value_4);
+    ASSERT_TRUE(value_5);
+}
+
+namespace IsDefaultConstructible {
+    struct Ex1 {
+        std::string str; // member has a non-trivial default ctor
+    };
+    struct Ex2 {
+        int n;
+        Ex2() = default; // trivial and non-throwing
+    };
+    struct Ex3 {
+        Ex3() = delete;
+    };
+}
+
+TEST(type_traits, TestIsDefaultConstructible) {
+    constexpr bool value_1 = std::is_default_constructible<IsDefaultConstructible::Ex1>::value;
+    ASSERT_TRUE(value_1);
+
+    constexpr bool value_2 = std::is_nothrow_default_constructible<IsDefaultConstructible::Ex2>::value;
+    ASSERT_TRUE(value_2);
+
+    constexpr bool value_3 = std::is_default_constructible<IsDefaultConstructible::Ex3>::value;
+    ASSERT_FALSE(value_3);
+}
+
+namespace IsCopyConstructible {
+    struct Ex1 {
+        std::string str; // member has a non-trivial default ctor
+    };
+    struct Ex2 {
+        int n;
+        Ex2(const Ex2&) = default; // trivial and non-throwing
+    };
+    struct Ex3 {
+        Ex3(const Ex3&) = delete;
+    };
+}
+
+TEST(type_traits, TestIsCopyConstructible) {
+    constexpr bool value_1 = std::is_copy_constructible<IsCopyConstructible::Ex1>::value;
+    ASSERT_TRUE(value_1);
+
+    constexpr bool value_2 = std::is_nothrow_copy_constructible<IsCopyConstructible::Ex2>::value;
+    ASSERT_TRUE(value_2);
+
+    constexpr bool value_3 = std::is_copy_constructible<IsCopyConstructible::Ex3>::value;
+    ASSERT_FALSE(value_3);
+}
+
+namespace IsMoveConstructible {
+    struct Ex1 {
+        std::string str; // member has a non-trivial default ctor
+    };
+    struct Ex2 {
+        int n;
+        Ex2(Ex2&&) = default; // trivial and non-throwing
+    };
+    struct Ex3 {
+        Ex3(const Ex3&) = default;
+    };
+    struct NoMove {
+        NoMove(NoMove&&) = delete;
+    };
+}
+
+TEST(type_traits, TestIsMoveConstructible) {
+    constexpr bool value_1 = std::is_move_constructible<IsMoveConstructible::Ex1>::value;
+    ASSERT_TRUE(value_1);
+
+    constexpr bool value_2 = std::is_nothrow_move_constructible<IsMoveConstructible::Ex2>::value;
+    ASSERT_TRUE(value_2);
+
+    constexpr bool value_3 = std::is_move_constructible<IsMoveConstructible::Ex3>::value;
+    ASSERT_TRUE(value_3);
+
+    constexpr bool value_4 = std::is_move_constructible<IsMoveConstructible::NoMove>::value;
+    constexpr bool value_5 = std::is_nothrow_move_constructible<IsMoveConstructible::NoMove>::value;
+    
+    ASSERT_FALSE(value_4);
+    ASSERT_FALSE(value_5);
+}
+
 int main(int argc, char *argv[]) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
