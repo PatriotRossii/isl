@@ -89,9 +89,9 @@ TEST(type_traits, TestIsIntegral) {
 TEST(type_traits, TestIsFloatingPoint) {
     ASSERT_FALSE(isl::is_floating_point<IsIntegral::A>::value);
     ASSERT_TRUE(isl::is_floating_point<float>::value);
-    ASSERT_TRUE(isl::is_floating_point<float&>::value);
+    ASSERT_FALSE(isl::is_floating_point<float&>::value);
     ASSERT_TRUE(isl::is_floating_point<double>::value);
-    ASSERT_TRUE(isl::is_floating_point<double&>::value);
+    ASSERT_FALSE(isl::is_floating_point<double&>::value);
     ASSERT_FALSE(isl::is_floating_point<int>::value);   
 }
 

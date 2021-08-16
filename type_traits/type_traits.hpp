@@ -139,7 +139,7 @@ namespace isl {
 
     template<class T>
     struct is_member_object_pointer: isl::bool_constant<
-        !isl::is_function_v<T> && isl::is_member_pointer_v<T>
+        isl::is_member_pointer_v<T> && !is_member_function_pointer_v<T>
     > { };
 
     // is_member_function_pointer
@@ -179,7 +179,7 @@ namespace isl {
         template<class T>
         struct is_member_pointer: isl::false_type { };
         template<class T, class U>
-        struct is_member_pointer<T U::*>: isl::false_type { };
+        struct is_member_pointer<T U::*>: isl::true_type { };
     }
     template<class T>
     struct is_member_pointer: detail::is_member_pointer<isl::remove_cv_t<T>> { };
@@ -322,7 +322,7 @@ namespace isl {
     namespace detail {
         template<class T, class U>
         auto test_assignable(int) -> decltype(
-            void(std::declval<T> = std::declval<U>),
+            void(std::declval<T>() = std::declval<U>()),
             std::true_type{}
         );
         template<class, class>
@@ -331,7 +331,7 @@ namespace isl {
         template<class T, class U>
         auto test_nothrow_assignable(int) -> decltype(
             std::bool_constant<
-                noexcept(std::declval<T> = std::declval<U>)
+                noexcept(std::declval<T>() = std::declval<U>())
             >{}
         );
         template<class, class>
