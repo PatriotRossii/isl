@@ -196,6 +196,92 @@ TEST(type_traits, TestIsMemberFunctionPointer) {
     );
 }
 
+TEST(type_traits, TestIsConst) {
+    ASSERT_FALSE(isl::is_const_v<int>);
+    ASSERT_TRUE(isl::is_const_v<const int>);
+    ASSERT_FALSE(isl::is_const_v<const int*>);
+    ASSERT_TRUE(isl::is_const_v<int* const>);
+    ASSERT_FALSE(isl::is_const_v<const int&>);
+    ASSERT_TRUE(isl::is_const_v<std::remove_reference_t<const int&>>);
+}
+
+TEST(type_traits, TestIsVolatile) {
+    ASSERT_FALSE(isl::is_volatile_v<int>);
+    ASSERT_TRUE(isl::is_volatile_v<volatile int>);
+}
+
+namespace IsAbstract {
+    struct A {
+        int m;
+    };
+ 
+    struct B {
+        virtual void foo();
+    };
+     
+    struct C {
+        virtual void foo() = 0;
+    };
+     
+    struct D : C {};
+}
+
+TEST(type_traits, TestIsAbstract) {
+    ASSERT_FALSE(isl::is_abstract<IsAbstract::A>::value);
+    ASSERT_FALSE(isl::is_abstract<IsAbstract::B>::value);
+    ASSERT_TRUE(isl::is_abstract<IsAbstract::C>::value);
+    ASSERT_TRUE(isl::is_abstract<IsAbstract::D>::value);
+}
+
+TEST(type_traits, TestIsSigned) {
+    ASSERT_FALSE(isl::is_signed<IsAbstract::A>::value);
+    ASSERT_TRUE(isl::is_signed<float>::value);
+    ASSERT_TRUE(isl::is_signed<signed int>::value);
+    ASSERT_FALSE(isl::is_signed<unsigned int>::value);
+    ASSERT_FALSE(isl::is_signed<IsAbstract::B>::value);
+    ASSERT_FALSE(isl::is_signed<IsAbstract::C>::value);
+ 
+    // shorter:
+    ASSERT_FALSE(isl::is_signed_v<bool>);
+    ASSERT_TRUE(isl::is_signed<signed int>());
+    ASSERT_FALSE(isl::is_signed<unsigned int>{});
+}
+
+namespace IsUnsigned {
+    class A {};
+    enum B : unsigned {};
+    enum class C : unsigned {};
+}
+
+TEST(type_traits, TestIsUnsigned) {
+    ASSERT_FALSE(isl::is_unsigned<IsUnsigned::A>::value);
+    ASSERT_FALSE(isl::is_unsigned<float>::value);
+    ASSERT_FALSE(isl::is_unsigned<signed int>::value);
+    ASSERT_TRUE(isl::is_unsigned<unsigned int>::value);
+    ASSERT_FALSE(isl::is_unsigned<IsUnsigned::B>::value);
+    ASSERT_FALSE(isl::is_unsigned<IsUnsigned::C>::value);
+}
+
+TEST(type_traits, TestIsBoundedArray) {
+    ASSERT_FALSE(isl::is_bounded_array_v<IsUnsigned::A>);
+    ASSERT_FALSE(isl::is_bounded_array_v<IsUnsigned::A[]>);
+    ASSERT_TRUE(isl::is_bounded_array_v<IsUnsigned::A[3]>);
+    ASSERT_FALSE(isl::is_bounded_array_v<float>);
+    ASSERT_FALSE(isl::is_bounded_array_v<int>);
+    ASSERT_FALSE(isl::is_bounded_array_v<int[]>);
+    ASSERT_TRUE(isl::is_bounded_array_v<int[3]>);
+}
+
+TEST(type_traits, TestIsUnboundedArray) {
+    ASSERT_FALSE(isl::is_unbounded_array_v<IsUnsigned::A>);
+    ASSERT_TRUE(isl::is_unbounded_array_v<IsUnsigned::A[]>);
+    ASSERT_FALSE(isl::is_unbounded_array_v<IsUnsigned::A[3]>);
+    ASSERT_FALSE(isl::is_unbounded_array_v<float>);
+    ASSERT_FALSE(isl::is_unbounded_array_v<int>);
+    ASSERT_TRUE(isl::is_unbounded_array_v<int[]>);
+    ASSERT_FALSE(isl::is_unbounded_array_v<int[3]>);
+}
+
 int main(int argc, char *argv[]) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
