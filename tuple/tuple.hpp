@@ -198,6 +198,28 @@ namespace isl {
 				)
 			)
 		): tuple(other, std::make_index_sequence<sizeof...(Types)>{}) { };
+
+		template<class U1, class U2>
+		explicit(
+			!isl::is_convertible_v<const U1&, isl::tuple_element_t<0, isl::tuple<Types...>>> ||
+			!isl::is_convertible_v<const U2&, isl::tuple_element_t<1, isl::tuple<Types...>>>
+		) tuple(const pair<U1,U2>& p) requires(
+			sizeof...(Types) == 2 &&
+			isl::is_constructible_v<isl::tuple_element_t<0, isl::tuple<Types...>>, const U1&> &&
+			isl::is_constructible_v<isl::tuple_element_t<1, isl::tuple<Types...>>, const U1&>
+		): head{p.first, p.second} { }
+
+		template<class U1, class U2>
+		explicit(
+			!isl::is_convertible_v<U1&&, isl::tuple_element_t<0, isl::tuple<Types...>>> ||
+			!isl::is_convertible_v<U2&&, isl::tuple_element_t<1, isl::tuple<Types...>>>
+		) tuple(pair<U1,U2>&& p) requires(
+			isl::is_constructible_v<isl::tuple_element_t<0, isl::tuple<Types...>>, U1&&> &&
+			isl::is_constructible_v<isl::tuple_element_t<1, isl::tuple<Types...>>, U2&&>
+		): head{std::forward<U1>(p.first), std::forward<U2>(p.second)} { }
+
+		tuple(const tuple& other) = default;
+		tuple(tuple&& other) = default;
 	};
 
 	template<class... UTypes>
