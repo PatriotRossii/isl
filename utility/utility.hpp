@@ -285,21 +285,22 @@ namespace isl {
 
 	namespace detail {
 		template<typename X>
-		auto pair_type(std::reference_wrapper<X>) -> X&;
-		auto pair_type(...) -> isl::true_type;
+		auto test_pair_type(std::reference_wrapper<X>) -> X&;
+		auto test_pair_type(...) -> isl::true_type;
+
+		template<typename T1,
+				 typename V1 = std::decay_t<T1>,
+				 typename D1 = decltype(test_pair_type(isl::declval<V1>()))
+				>
+		using pair_type = isl::conditional_t<
+			isl::is_same_v<D1, isl::true_type>, V1, D1
+		>;
 	}
 
 	template<class T1, class T2>
 	constexpr auto make_pair(T1&& t, T2&& u) {
-		using V1 = std::decay_t<T1>;
-		using V2 = std::decay_t<T2>;
-
-		using D1 = decltype(detail::pair_type(isl::declval<V1>()));
-		using D2 = decltype(detail::pair_type(isl::declval<V2>()));
-
 		return isl::pair<
-			isl::conditional_t<isl::is_same_v<D1, isl::true_type>, V1, D1>,
-			isl::conditional_t<isl::is_same_v<D2, isl::true_type>, V2, D2>
+			detail::pair_type<T1>, detail::pair_type<T2>
 		>(isl::forward<T1>(t), isl::forward<T2>(u));
 	}
 
