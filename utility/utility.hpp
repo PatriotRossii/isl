@@ -199,16 +199,16 @@ namespace isl {
 
 		template<typename Tuple, size_t I, typename Type>
 		tuple<I, Type>& __get_element(
-			Tuple* t
+			Tuple& t
 		) {
-			return *static_cast<
-				tuple<I, Type>*
+			return static_cast<
+				tuple<I, Type>
 			>(t);
 		}
 
 		template<typename Tuple, size_t I>
 		auto& __get_element(
-			Tuple* t
+			Tuple& t
 		) {
 			return __get_element<Tuple, I, tuple_element<I, Tuple>::type>(
 				t
@@ -217,39 +217,39 @@ namespace isl {
 
 		template<typename Tuple, size_t I, typename T>
 		void __set_element(
-			Tuple* t,
+			Tuple& t,
 			T&& value
 		) {
 			__get_element<Tuple, I>(t) = std::forward<T>(value);
 		}
 
 		template<typename Tuple, typename T, size_t... I>
-		void __initialize(Tuple* t, T&& value) {
+		void __initialize(Tuple& t, T&& value) {
 			(..., __set_element<Tuple, I, T>(
 				t, std::forward<T>(value)
 			));
 		}
 
 		template<typename Tuple, size_t I, typename Arg>
-		void __initialize(Tuple* t, Arg&& value) {
+		void __initialize(Tuple& t, Arg&& value) {
 			__set_element<Tuple, I, Arg>(
 				t, std::forward<Arg>(value)
 			);
 		}
 
 		template<typename Tuple, size_t I, size_t... N, typename Arg, typename... Args>
-		void __initialize(Tuple* t, Arg&& value, Args&&... args) {
+		void __initialize(Tuple& t, Arg&& value, Args&&... args) {
 			__initialize<Tuple, I, Arg>(t, std::forward<Arg>(value));
 			__initialize<Tuple, N..., Args...>(t, std::forward<Args>(args)...);
 		}
 
 		template<typename Tuple, typename... Args, size_t... I>
-		void __initialize(Tuple* t, Args&&... args, std::index_sequence<I...>) {
+		void __initialize(Tuple& t, Args&&... args, std::index_sequence<I...>) {
 			__initialize<Tuple, I..., Args...>(t, std::forward<Args>(args)...);
 		}
 
 		template<typename Tuple, typename... Args>
-		void __initialize(Tuple* t, Args&&... args) {
+		void __initialize(Tuple& t, Args&&... args) {
 			__initialize<Tuple, Args...>(
 				t, args..., std::index_sequence_for<Args...>()
 			);
@@ -425,6 +425,23 @@ namespace isl {
 	) { x.swap(y); }
 
 	// isl::get
+
+	template<std::size_t I, class... Types>
+	typename isl::tuple_element<I, tuple<Types...> >::type&
+		get(tuple<Types...>& t) noexcept;
+
+	template<std::size_t I, class... Types>
+	typename std::tuple_element<I, tuple<Types...> >::type&&
+	    get(tuple<Types...>&& t) noexcept;
+
+	template<std::size_t I, class... Types>
+	typename std::tuple_element<I, tuple<Types...>>::type const&
+	    get(const tuple<Types...>& t) noexcept;
+
+	template<std::size_t I, class... Types>
+	typename std::tuple_element<I, tuple<Types...>>::type const&&
+	    get(const tuple<Types...>&& t) noexcept;
+
 
 	template <class T, class U>
 	constexpr T& get(std::pair<T, U>& p) noexcept {
