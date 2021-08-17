@@ -258,4 +258,11 @@ namespace isl {
 			detail::__get_element<tuple<Types...>, I>(t).value
 		);
 	}
+
+	template<class... Types>
+	isl::tuple<detail::pair_type<Types>...> make_tuple(Types&&... args) {
+		return tuple(
+			std::forward<Types>(args)...
+		);
+	}
 }
