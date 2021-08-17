@@ -165,6 +165,30 @@ namespace isl {
 	}
 }
 
+// tuple
+namespace isl {
+	namespace detail {
+		template<typename... Args>
+		struct __tuple_element;
+
+		template<typename T, typename U, typename... Args>
+		struct __tuple_element<T, U, Args...> {
+			T value;
+			__tuple_element<U, Args...> next;
+		};
+
+		template<typename T>
+		struct __tuple_element<T> {
+			T value;
+
+		};
+	};
+	template<class... Types>
+	class tuple {
+		detail::__tuple_element<Types...> head;
+	};
+}
+
 // pair
 namespace isl {
 	template<class T1, class T2>
