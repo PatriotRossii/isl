@@ -59,4 +59,24 @@ namespace isl {
 	constexpr T&& forward(isl::remove_reference_t<T>&& t) noexcept {
 		return static_cast<T&&>(t); 
 	}
+
+	// move
+
+	template<class T>
+	constexpr isl::remove_reference_t<T>&& move(T&& t) noexcept {
+		return static_cast<isl::remove_reference_t<T>&&>(t);
+	}
+
+	// move_if_noexcept
+
+	template<class T, isl::enable_if_t<
+		!isl::is_nothrow_move_constructible_v<T> && isl::is_copy_constructible_v<T>, bool
+	> = true>
+	const T& move_if_noexcept(T& x) noexcept {
+		return x;
+	}
+	template<class T>
+	const T& move_if_noexcept(T& x) noexcept {
+		return isl::move(x);
+	}
 }
