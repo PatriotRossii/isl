@@ -524,7 +524,7 @@ namespace isl {
 
         template<class From, class To, bool is_noexcept>
         struct is_convertible: isl::bool_constant<
-            (decltype(detail::test_returnable<To>(0))::value 
+            (decltype(detail::test_returnable<To, is_noexcept>(0))::value 
                 && decltype(detail::test_implicitly_convertible<From, To, is_noexcept>(0))::value) ||
             (isl::is_same_v<void, From> && isl::is_same_v<void, To>)
         >{ };
