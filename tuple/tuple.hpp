@@ -14,7 +14,7 @@ namespace isl {
 
 	template<class Head, class... Tail>
 	struct tuple_element<0, isl::tuple<Head, Tail...>> {
-		using Type = Head;
+		using type = Head;
 	};
 }
 
@@ -38,16 +38,14 @@ namespace isl {
 		tuple<I, Type>& __get_element(
 			Tuple& t
 		) {
-			return static_cast<
-				tuple<I, Type>
-			>(t);
+			return static_cast<tuple<I, Type>&>(t.head);
 		}
 
 		template<typename Tuple, size_t I>
 		auto& __get_element(
 			Tuple& t
 		) {
-			return __get_element<Tuple, I, tuple_element<I, Tuple>::type>(
+			return __get_element<Tuple, I, tuple_element_t<I, Tuple>>(
 				t
 			);
 		}
@@ -94,8 +92,9 @@ namespace isl {
 	}
 	template<class... Types>
 	class tuple {
-		detail::tuple<0, Types...> head;
 	public:
+		detail::tuple<0, Types...> head;
+
 		explicit(
 			(... || !isl::__is_implicit_default_constructible_v<Types>)
 		) constexpr tuple() requires(
@@ -113,30 +112,30 @@ namespace isl {
 
 namespace isl {
 	template<std::size_t I, class... Types>
-	constexpr typename isl::tuple_element<I, tuple<Types...>>::type&
+	constexpr isl::tuple_element_t<I, tuple<Types...>>&
 	get(tuple<Types...>& t) noexcept {
-		return detail::__get_element<tuple<Types...>, I>(t);
+		return detail::__get_element<tuple<Types...>, I>(t).value;
 	}
 
 	template<std::size_t I, class... Types>
-	constexpr typename isl::tuple_element<I, tuple<Types...>>::type&&
+	constexpr isl::tuple_element_t<I, tuple<Types...>>&&
 	get(tuple<Types...>&& t) noexcept {
-		return isl::forward<isl::tuple_element<I, tuple<Types...> >::type>(
-			detail::__get_element<tuple<Types...>, I>(t)
+		return isl::forward<isl::tuple_element_t<I, tuple<Types...>>>(
+			detail::__get_element<tuple<Types...>, I>(t).value
 		);
 	}
 
 	template<std::size_t I, class... Types>
-	constexpr typename isl::tuple_element<I, tuple<Types...>>::type const&
+	constexpr isl::tuple_element_t<I, tuple<Types...>> const&
 	get(const tuple<Types...>& t) noexcept {
-		return detail::__get_element<tuple<Types...>, I>(t);
+		return detail::__get_element<tuple<Types...>, I>(t).value;
 	}
 
 	template<std::size_t I, class... Types>
-	constexpr typename isl::tuple_element<I, tuple<Types...>>::type const&&
+	constexpr isl::tuple_element_t<I, tuple<Types...>>const&&
 	get(const tuple<Types...>&& t) noexcept {
-		return isl::forward<isl::tuple_element<I, tuple<Types...> >::type>(
-			detail::__get_element<tuple<Types...>, I>(t)
+		return isl::forward<isl::tuple_element_t<I, tuple<Types...>>>(
+			detail::__get_element<tuple<Types...>, I>(t).value
 		);
 	}
 }
