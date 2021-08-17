@@ -93,4 +93,51 @@ namespace isl {
 
 	template<class T>
 	isl::add_rvalue_reference_t<T> declval() noexcept;
+
+	/*
+		cmp_equal, cmp_not_equal, cmp_less,
+		cmp_greater, cmp_less_equal, cmp_greater_equal
+	*/
+
+	template<class T, class U>
+	constexpr bool cmp_equal(T t, U u) noexcept {
+		if constexpr(isl::is_signed_v<T> && isl::is_unsigned_v<U>) {
+			if(t < 0) return false;
+		}
+		if constexpr(isl::is_signed_v<U> && isl::is_unsigned_v<T>) {
+			if(u < 0) return false;
+		}
+		return t == u;
+	}
+
+	template<class T, class U>
+	constexpr bool cmp_not_equal( T t, U u ) noexcept {
+		return !cmp_equal(t, u);
+	}
+
+	template<class T, class U>
+	constexpr bool cmp_less(T t, U u) noexcept {
+		if constexpr(isl::is_signed_v<T> && isl::is_unsigned_v<U>) {
+			if(t < 0) return true; // signed (< 0) < unsigned = true
+		}
+		if constexpr(isl::is_signed_v<U> && isl::is_unsigned_v<T>) {
+			if(u < 0) return false; // unsigned < signed (< 0) = false
+		}
+		return t < u;
+	}
+
+	template<class T, class U>
+	constexpr bool cmp_greater(T t, U u) noexcept {
+		return cmp_less(u, t);
+	}
+
+	template<class T, class U>
+	constexpr bool cmp_less_equal(T t, U u) noexcept {
+		return !cmp_greater(t, u);
+	}
+
+	template<class T, class U>
+	constexpr bool cmp_greater_equal(T t, U u) noexcept {
+		return !cmp_less(t, u);
+	}
 }
