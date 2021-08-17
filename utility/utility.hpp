@@ -2,6 +2,8 @@
 
 #include <algorithm> // std::swap_ranges
 #include <limits> // std::numeric_limits
+#include <type_traits> // std::decay
+#include <functional> // std::functional
 
 // Functions
 namespace isl {
@@ -158,5 +160,27 @@ namespace isl {
 	constexpr bool in_range(T t) noexcept {
 		return cmp_greater_equal(t, std::numeric_limits<R>::min())
 			&& cmp_less_equal(t, std::numeric_limits<R>::max());
+	}
+
+	// make_pair
+
+	namespace detail {
+		template<typename X>
+		auto pair_type(std::reference_wrapper<X>) -> X&;
+		auto pair_type(...) -> isl::true_type;
+	}
+
+	template<class T1, class T2>
+	constexpr auto make_pair(T1&& t, T2&& u) {
+		using V1 = std::decay_t<T1>;
+		using V2 = std::decay_t<T2>;
+
+		using D1 = decltype(detail::pair_type(isl::declval<V1>()));
+		using D2 = decltype(detail::pair_type(isl::declval<V2>()));
+
+		return std::pair<
+			isl::conditional_t<isl::is_same_v<D1, isl::true_type>, V1, D1>,
+			isl::conditional_t<isl::is_same_v<D2, isl::true_type>, V2, D2>
+		>(isl::forward<T1>(t), isl::forward<T2>(u));
 	}
 }
