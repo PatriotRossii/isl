@@ -167,6 +167,21 @@ namespace isl {
 
 // tuple
 namespace isl {
+	template<class... Types>
+	class tuple;
+
+	template<size_t I, class T>
+	struct tuple_element;
+
+	template<size_t I, class Head, class... Tail>
+	struct tuple_element<I, tuple<Head, Tail...>>
+		: std::tuple_element<I - 1, tuple<Tail...>> { };
+
+	template<class Head, class... Tail>
+	struct tuple_element<0, tuple<Head, Tail...>> {
+		using Type = Head;
+	};
+
 	namespace detail {
 		template<size_t I, typename... T>
 		struct tuple;
