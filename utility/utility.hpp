@@ -23,7 +23,7 @@ namespace isl {
 		isl::is_nothrow_move_constructible_v<T> &&
 		isl::is_nothrow_move_assignable_v<T>
 	) {
-		T temporary = std::move(a);
+		T temporary = std::move(b);
 		b = std::move(a);
 		a = std::move(temporary);
 	}
