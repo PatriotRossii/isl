@@ -168,24 +168,37 @@ namespace isl {
 // tuple
 namespace isl {
 	namespace detail {
-		template<typename... Args>
-		struct __tuple_element;
+		template<size_t I, typename... T>
+		struct tuple;
 
-		template<typename T, typename U, typename... Args>
-		struct __tuple_element<T, U, Args...> {
+		template<size_t I, typename T, typename... U>
+		struct tuple<I, T, U...>: tuple<I, T>, tuple<
+			I + 1, U...
+		> { };
+
+		template<size_t I, typename T>
+		struct tuple<I, T> {
 			T value;
-			__tuple_element<U, Args...> next;
 		};
 
-		template<typename T>
-		struct __tuple_element<T> {
-			T value;
-
-		};
-	};
+		template<typename Tuple, size_t I, typename Type>
+		tuple<I, Type>& __get_element(
+			Tuple* t
+		) {
+			return static_cast<
+				tuple<I, Type>
+			>(t);
+		}
+	}
 	template<class... Types>
 	class tuple {
-		detail::__tuple_element<Types...> head;
+		detail::tuple<0, Types...> head;
+	public:
+		explicit(
+			(... || !isl::__is_implicit_default_constructible_v<Types>)
+		) constexpr tuple() requires(
+			(... && isl::is_default_constructible_v<Types>)
+		) {}
 	};
 }
 
