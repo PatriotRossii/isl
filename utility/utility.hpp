@@ -276,7 +276,10 @@ namespace isl {
 
 	template<class T1, class T2>
 	pair(T1, T2) -> pair<T1, T2>;
+}
 
+// isl::pair non-member functions
+namespace isl {
 	// make_pair
 
 	namespace detail {
@@ -318,4 +321,47 @@ namespace isl {
 	) requires(
 		isl::is_swappable_v<T1> && isl::is_swappable_v<T2>
 	) { x.swap(y); }
+
+	// isl::get
+
+	template <class T, class U>
+	constexpr T& get(std::pair<T, U>& p) noexcept {
+		return p.first;
+	}
+
+	template <class T, class U>
+	constexpr const T& get(const std::pair<T, U>& p) noexcept {
+		return p.first;
+	}
+
+	template <class T, class U>
+	constexpr T&& get(std::pair<T, U>&& p) noexcept {
+		return isl::forward<T>(p.first);
+	}
+
+	template <class T, class U>
+	constexpr const T&& get(const std::pair<T, U>&& p) noexcept {
+		return isl::forward<T>(p.first);
+	}
+
+	template <class T, class U>
+	constexpr T& get(std::pair<U, T>& p) noexcept {
+		return p.second;
+
+	}
+
+	template <class T, class U>
+	constexpr const T& get(const std::pair<U, T>& p) noexcept {
+		return p.second;
+	}
+
+	template <class T, class U>
+	constexpr T&& get(std::pair<U, T>&& p) noexcept {
+		return isl::forward<T>(p.second);
+	}
+
+	template <class T, class U>
+	constexpr const T&& get(const std::pair<U, T>&& p) noexcept {
+		return isl::forward<T>(p.second);
+	}
 }
