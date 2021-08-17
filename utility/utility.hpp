@@ -229,6 +229,31 @@ namespace isl {
 				t, std::forward<T>(value)
 			));
 		}
+
+		template<typename Tuple, size_t I, typename Arg>
+		void __initialize(Tuple* t, Arg&& value) {
+			__set_element<Tuple, I, Arg>(
+				t, std::forward<Arg>(value)
+			);
+		}
+
+		template<typename Tuple, size_t I, size_t... N, typename Arg, typename... Args>
+		void __initialize(Tuple* t, Arg&& value, Args&&... args) {
+			__initialize<Tuple, I, Arg>(t, std::forward<Arg>(value));
+			__initialize<Tuple, N..., Args...>(t, std::forward<Args>(args)...);
+		}
+
+		template<typename Tuple, typename... Args, size_t... I>
+		void __initialize(Tuple* t, Args&&... args, std::index_sequence<I...>) {
+			__initialize<Tuple, I..., Args...>(t, std::forward<Args>(args)...);
+		}
+
+		template<typename Tuple, typename... Args>
+		void __initialize(Tuple* t, Args&&... args) {
+			__initialize<Tuple, Args...>(
+				t, args..., std::index_sequence_for<Args...>()
+			);
+		}
 	}
 	template<class... Types>
 	class tuple {
