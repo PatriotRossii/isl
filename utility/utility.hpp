@@ -5,6 +5,8 @@
 #include <type_traits> // std::decay
 #include <functional> // std::functional
 
+#include <compare> // std::common_comparison_category
+
 // Functions
 namespace isl {
 	// swap
@@ -161,6 +163,119 @@ namespace isl {
 		return cmp_greater_equal(t, std::numeric_limits<R>::min())
 			&& cmp_less_equal(t, std::numeric_limits<R>::max());
 	}
+}
+
+// pair
+namespace isl {
+	template<class T1, class T2>
+	struct pair {
+		using first_type = T1;
+		using second_type = T2;
+
+		T1 first;
+		T2 second;
+
+		// Constructor
+
+		explicit(
+			!isl::__is_implicit_default_constructible_v<first_type> ||
+			!isl::__is_implicit_default_constructible_v<second_type>
+		) constexpr pair() requires(
+			isl::is_default_constructible_v<first_type> &&
+			isl::is_default_constructible_v<second_type>
+		) = default;
+
+		explicit(
+			!isl::is_convertible_v<const first_type&, first_type> ||
+			!isl::is_convertible_v<const second_type&, second_type>
+		) constexpr pair(const T1& x, const T2& y) requires (
+			isl::is_copy_constructible_v<first_type> &&
+			isl::is_copy_constructible_v<second_type>
+		): first(x), second(y) { }
+
+		template<class U1 = T1, class U2 = T2>
+		explicit(
+			!isl::is_convertible_v<U1&&, first_type> ||
+			!isl::is_convertible_v<U2&&, second_type>
+		) constexpr pair(U1&& x, U2&& y) requires (
+			isl::is_constructible_v<first_type, U1&&> &&
+			isl::is_constructible_v<second_type, U2&&>
+		): first(std::forward<U1>(x)), second(std::forward<U2>(y)) { }
+
+		template<class U1, class U2>
+		explicit(
+			!isl::is_convertible_v<const U1&, first_type> ||
+			!isl::is_convertible_v<const U2&, second_type>
+		) pair(const pair<U1, U2>& p) requires(
+			isl::is_constructible_v<first_type, const U1&> &&
+			isl::is_constructible_v<second_type, const U2&>
+		): first(p.first), second(p.second) { }
+
+		template<class U1, class U2>
+		explicit(
+			!isl::is_convertible_v<U1&&, first_type> ||
+			!isl::is_convertible_v<U2&&, second_type>
+		) constexpr pair(pair<U1, U2>&& p) requires(
+			isl::is_constructible_v<first_type, U1&&> &&
+			isl::is_constructible_v<second_type, U2&&>
+		): first(isl::forward<U1>(p.first)), second(isl::forward<U2>(p.second)) {}
+
+		template<class... Args1, class... Args2>
+		constexpr pair(std::piecewise_construct_t,
+			std::tuple<Args1...> first_args,
+			std::tuple<Args2...> second_args):
+				first(isl::forward<Args1>(first_args)...),
+				second(isl::forward<Args2>(second_args)...) { }
+
+		pair( const pair& p ) = default;
+		pair( pair&& p ) = default;
+
+		// operator=
+
+		constexpr pair& operator=(const pair& other) = default;
+		constexpr pair& operator=(const pair& other) requires(
+			!isl::is_copy_assignable_v<first_type> ||
+			!isl::is_copy_assignable_v<second_type>
+		) = delete;
+
+		template<class U1, class U2>
+		constexpr pair& operator=(const pair<U1,U2>& other) requires(
+			isl::is_assignable_v<first_type&, const U1&>,
+			isl::is_assignable_v<second_type&, const U2&>
+		) {
+			first = other.first;
+			second = other.second;
+		}
+
+		constexpr pair& operator=(pair&& other) noexcept(
+		    isl::is_nothrow_move_assignable_v<T1> &&
+		    isl::is_nothrow_move_assignable_v<T2>
+	    )  requires(
+	   		isl::is_move_assignable_v<first_type> &&
+	   		isl::is_move_assignable_v<second_type>
+	    ) {
+	    	first = isl::forward<first_type>(other.first);
+	    	second = isl::forward<second_type>(other.second);
+	    }
+
+		template<class U1, class U2>
+		constexpr pair& operator=(pair<U1,U2>&& other) requires(
+			isl::is_assignable_v<first_type&, U1> && isl::is_assignable_v<second_type&, U2>
+		) {
+			first = std::forward<U1>(other.first);
+			second = std::forward<U2>(other.second);
+		}
+		constexpr void swap(pair& other) noexcept(
+		    isl::is_nothrow_swappable_v<first_type> &&
+		    isl::is_nothrow_swappable_v<second_type>
+		) {
+			isl::swap(first, other.first);
+			isl::swap(second, other.second);
+		}
+	};
+
+	template<class T1, class T2>
+	pair(T1, T2) -> pair<T1, T2>;
 
 	// make_pair
 
@@ -178,9 +293,29 @@ namespace isl {
 		using D1 = decltype(detail::pair_type(isl::declval<V1>()));
 		using D2 = decltype(detail::pair_type(isl::declval<V2>()));
 
-		return std::pair<
+		return isl::pair<
 			isl::conditional_t<isl::is_same_v<D1, isl::true_type>, V1, D1>,
 			isl::conditional_t<isl::is_same_v<D2, isl::true_type>, V2, D2>
 		>(isl::forward<T1>(t), isl::forward<T2>(u));
 	}
+
+	// operator<=>
+
+	template<class T1, class T2>
+	constexpr std::common_comparison_category_t<
+		decltype(isl::declval<T1>() <=> isl::declval<T1>()),
+		decltype(isl::declval<T2>() <=> isl::declval<T2>())
+	> operator<=>(const pair<T1, T2>& x, const pair<T1, T2>& y) {
+		if(auto c = x.first <=> y.first; c != 0) return c;
+		return x.second <=> y.second;
+	}
+
+	// isl::swap(std::pair)
+
+	template<class T1, class T2>
+	constexpr void swap(pair<T1, T2>& x, pair<T1, T2>& y) noexcept(
+		noexcept(x.swap(y))
+	) requires(
+		isl::is_swappable_v<T1> && isl::is_swappable_v<T2>
+	) { x.swap(y); }
 }
