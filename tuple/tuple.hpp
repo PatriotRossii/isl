@@ -51,12 +51,21 @@ namespace isl {
 		}
 
 		template<typename Tuple, size_t I, typename T>
+		void __construct_element(
+			Tuple& t,
+			T&& value
+		) {
+			__get_element<Tuple, I>(t)(isl::forward<T>(value))
+		}
+
+		template<typename Tuple, size_t I, typename T>
 		void __set_element(
 			Tuple& t,
 			T&& value
 		) {
-			__get_element<Tuple, I>(t) = isl::forward<T>(value);
+			__get_element<Tuple, I>(t) = isl::forward<T>(value)
 		}
+
 
 		template<typename Tuple, typename T, size_t... I>
 		void __initialize(Tuple& t, T&& value) {
