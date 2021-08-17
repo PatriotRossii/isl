@@ -145,13 +145,59 @@ namespace isl {
 			(... && isl::is_default_constructible_v<Types>)
 		) { }
 
-		template<class... UTypes>
 		explicit(
 			(... || !isl::is_convertible_v<const Types&, Types>)
-		) tuple(UTypes&&... args) requires(
+		) tuple(const Types&... args) requires(
 			sizeof...(Types) >= 1 &&
 				(... && isl::is_copy_constructible_v<Types>)
 		): head{args...} { }
+
+		template<class... UTypes>
+		explicit(
+			(... || !isl::is_convertible_v<UTypes&&, Types>)
+		) tuple(UTypes&&... args) requires(
+			sizeof...(Types) == sizeof...(UTypes) &&
+			sizeof...(Types) >= 1 &&
+				(... && isl::is_constructible_v<UTypes&&, Types>)
+		): head{std::forward<UTypes>(args)...} { }
+
+		template<class... UTypes, size_t... I>
+		tuple(const tuple<UTypes...>& other, std::index_sequence<I...>): head{isl::get<I>(other)...} {}
+
+		template<class... UTypes>
+		explicit(
+			(... || !isl::is_convertible_v<const UTypes&, Types>)
+		) tuple(const tuple<UTypes...>& other) requires(
+			(
+				sizeof...(Types) == sizeof...(UTypes) &&
+				(... && isl::is_constructible_v<Types, const UTypes&>) && (
+					(sizeof...(Types) != 1) || (
+						(... && !isl::is_convertible_v<tuple<UTypes>, Types>) &&
+						(... && !isl::is_constructible_v<Types, tuple<UTypes>>) &&
+						(... && !isl::is_same_v<Types, UTypes>)
+					)
+				)
+			)
+		): tuple(other, std::make_index_sequence<sizeof...(Types)>{}) { }
+
+		template <class... UTypes, size_t... I>
+		tuple(tuple<UTypes...>&& other, std::index_sequence<I...>): head{isl::forward<UTypes>(isl::get<I>(other))...} { }
+
+		template <class... UTypes>
+		explicit(
+			isl::is_convertible_v<UTypes&&, Types>
+		) tuple(tuple<UTypes...>&& other) requires (
+			sizeof...(Types) == sizeof...(UTypes) &&
+			(... && isl::is_constructible_v<Types, UTypes&&>) &&
+			(
+				(sizeof...(Types) != 1) ||
+				(
+					(... && !isl::is_convertible_v<tuple<UTypes>, Types>) &&
+					(... && !isl::is_convertible_v<Types, tuple<UTypes>>) &&
+					(... && !isl::is_same_v<Types, UTypes>)
+				)
+			)
+		): tuple(other, std::make_index_sequence<sizeof...(Types)>{}) { };
 	};
 
 	template<class... UTypes>
