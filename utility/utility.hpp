@@ -88,4 +88,9 @@ namespace isl {
 	}
 	template<class T>
 	void as_const(const T&&) = delete;
+
+	// declval
+
+	template<class T>
+	isl::add_rvalue_reference_t<T> declval() noexcept;
 }
