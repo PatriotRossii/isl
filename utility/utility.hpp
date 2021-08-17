@@ -1,3 +1,5 @@
+#include "synopsis.hpp"
+
 #include "../type_traits/type_traits.hpp"
 
 #include <algorithm> // std::swap_ranges
@@ -66,7 +68,7 @@ namespace isl {
 
 	// exchange
 
-	template<class T, class U = T>
+	template<class T, class U>
 	constexpr T exchange(T& obj, U&& new_value) {
 		T old_value = isl::move(obj);
 		obj = isl::forward<U>(new_value);
@@ -92,8 +94,6 @@ namespace isl {
 	constexpr isl::add_const_t<T>& as_const(T& t) noexcept {
 		return t;
 	}
-	template<class T>
-	void as_const(const T&&) = delete;
 
 	// declval
 
