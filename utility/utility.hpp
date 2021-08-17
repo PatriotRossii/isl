@@ -6,6 +6,7 @@
 #include <functional> // std::functional
 
 #include <compare> // std::common_comparison_category
+#include <utility> // std::index_sequence_for
 
 // Functions
 namespace isl {
@@ -200,9 +201,33 @@ namespace isl {
 		tuple<I, Type>& __get_element(
 			Tuple* t
 		) {
-			return static_cast<
-				tuple<I, Type>
+			return *static_cast<
+				tuple<I, Type>*
 			>(t);
+		}
+
+		template<typename Tuple, size_t I>
+		auto& __get_element(
+			Tuple* t
+		) {
+			return __get_element<Tuple, I, tuple_element<I, Tuple>::type>(
+				t
+			);
+		}
+
+		template<typename Tuple, size_t I, typename T>
+		void __set_element(
+			Tuple* t,
+			T&& value
+		) {
+			__get_element<Tuple, I>(t) = std::forward<T>(value);
+		}
+
+		template<typename Tuple, typename T, size_t... I>
+		void __initialize(Tuple* t, T&& value) {
+			(..., __set_element<Tuple, I, T>(
+				t, std::forward<T>(value)
+			));
 		}
 	}
 	template<class... Types>
