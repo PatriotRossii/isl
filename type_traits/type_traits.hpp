@@ -283,6 +283,22 @@ namespace isl {
         auto test_nothrow_constructible(...) -> isl::false_type;
     }
 
+    namespace detail {
+        template<class T>
+        auto test_implicit_default_construction(int) -> decltype(
+            void(static_cast<void(*)(T)>(nullptr)({})), isl::true_type{}
+        );
+        template<class T>
+        auto test_implicit_default_constructible(...) -> isl::false_type;
+    }
+    template<class T>
+    struct __is_implicit_default_constructible: decltype(
+        detail::test_implicit_default_constructible<T>(0)
+    ) { };
+    template<class T>
+    inline constexpr bool __is_implicit_default_constructible_v = 
+        __is_implicit_default_constructible<T>::value;
+
     template<class T, class... Args>
     struct is_constructible:
         decltype(detail::test_constructible<T, Args...>(0))
