@@ -428,20 +428,31 @@ namespace isl {
 
 	template<std::size_t I, class... Types>
 	typename isl::tuple_element<I, tuple<Types...> >::type&
-		get(tuple<Types...>& t) noexcept;
+		get(tuple<Types...>& t) noexcept {
+		return detail::__get_element<tuple<Types...>, I>(t);
+	}
 
 	template<std::size_t I, class... Types>
 	typename std::tuple_element<I, tuple<Types...> >::type&&
-	    get(tuple<Types...>&& t) noexcept;
+	    get(tuple<Types...>&& t) noexcept {
+		return isl::forward<std::tuple_element<I, tuple<Types...> >::type>(
+			detail::__get_element<tuple<Types...>, I>(t)
+		);
+	}
 
 	template<std::size_t I, class... Types>
 	typename std::tuple_element<I, tuple<Types...>>::type const&
-	    get(const tuple<Types...>& t) noexcept;
+	    get(const tuple<Types...>& t) noexcept {
+		return detail::__get_element<tuple<Types...>, I>(t);
+	}
 
 	template<std::size_t I, class... Types>
 	typename std::tuple_element<I, tuple<Types...>>::type const&&
-	    get(const tuple<Types...>&& t) noexcept;
-
+	    get(const tuple<Types...>&& t) noexcept {
+		return isl::forward<std::tuple_element<I, tuple<Types...> >::type>(
+			detail::__get_element<tuple<Types...>, I>(t)
+		);
+	}
 
 	template <class T, class U>
 	constexpr T& get(std::pair<T, U>& p) noexcept {
