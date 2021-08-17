@@ -265,4 +265,9 @@ namespace isl {
 			std::forward<Types>(args)...
 		);
 	}
+
+	template<class... Types>
+	constexpr isl::tuple<Types&...> tie(Types&... args) noexcept {
+		return {args...};
+	}
 }
