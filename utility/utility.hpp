@@ -1,6 +1,7 @@
 #include "../type_traits/type_traits.hpp"
 
 #include <algorithm> // std::swap_ranges
+#include <limits> // std::numeric_limits
 
 // Functions
 namespace isl {
@@ -151,5 +152,11 @@ namespace isl {
 	> = true>
 	constexpr bool cmp_greater_equal(T t, U u) noexcept {
 		return !cmp_less(t, u);
+	}
+
+	template<class R, class T>
+	constexpr bool in_range(T t) noexcept {
+		return cmp_greater_equal(t, std::numeric_limits<R>::min())
+			&& cmp_less_equal(t, std::numeric_limits<R>::max());
 	}
 }
