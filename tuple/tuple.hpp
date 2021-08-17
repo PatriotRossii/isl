@@ -144,6 +144,14 @@ namespace isl {
 		) constexpr tuple() requires(
 			(... && isl::is_default_constructible_v<Types>)
 		) { }
+
+		template<class... UTypes>
+		explicit(
+			(... || !isl::is_convertible_v<const Types&, Types>)
+		) tuple(UTypes&&... args) requires(
+			sizeof...(Types) >= 1 &&
+				(... && isl::is_copy_constructible_v<Types>)
+		): head{args...} { }
 	};
 
 	template<class... UTypes>
