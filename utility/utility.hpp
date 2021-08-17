@@ -41,4 +41,22 @@ namespace isl {
 		obj = std::forward<U>(new_value);
 		return old_value;
 	}
+
+	// forward
+
+	/*
+		& + & = &
+		& + && = &
+		&& + & = &
+		&& + && = &&
+	*/
+
+	template<class T>
+	constexpr T&& forward(isl::remove_reference_t<T>& t) noexcept {
+		return static_cast<T&&>(t);
+	}
+	template<class T>
+	constexpr T&& forward(isl::remove_reference_t<T>&& t) noexcept {
+		return static_cast<T&&>(t); 
+	}
 }
