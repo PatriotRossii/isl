@@ -99,7 +99,9 @@ namespace isl {
 		cmp_greater, cmp_less_equal, cmp_greater_equal
 	*/
 
-	template<class T, class U>
+	template<class T, class U, isl::enable_if_t<
+		isl::is_arithmetic_v<T> && isl::is_arithmetic_v<U>, bool
+	> = true>
 	constexpr bool cmp_equal(T t, U u) noexcept {
 		if constexpr(isl::is_signed_v<T> && isl::is_unsigned_v<U>) {
 			if(t < 0) return false;
@@ -110,12 +112,16 @@ namespace isl {
 		return t == u;
 	}
 
-	template<class T, class U>
+	template<class T, class U, isl::enable_if_t<
+		isl::is_arithmetic_v<T> && isl::is_arithmetic_v<U>, bool
+	> = true>
 	constexpr bool cmp_not_equal( T t, U u ) noexcept {
 		return !cmp_equal(t, u);
 	}
 
-	template<class T, class U>
+	template<class T, class U, isl::enable_if_t<
+		isl::is_arithmetic_v<T> && isl::is_arithmetic_v<U>, bool
+	> = true>
 	constexpr bool cmp_less(T t, U u) noexcept {
 		if constexpr(isl::is_signed_v<T> && isl::is_unsigned_v<U>) {
 			if(t < 0) return true; // signed (< 0) < unsigned = true
@@ -126,17 +132,23 @@ namespace isl {
 		return t < u;
 	}
 
-	template<class T, class U>
+	template<class T, class U, isl::enable_if_t<
+		isl::is_arithmetic_v<T> && isl::is_arithmetic_v<U>, bool
+	> = true>
 	constexpr bool cmp_greater(T t, U u) noexcept {
 		return cmp_less(u, t);
 	}
 
-	template<class T, class U>
+	template<class T, class U, isl::enable_if_t<
+		isl::is_arithmetic_v<T> && isl::is_arithmetic_v<U>, bool
+	> = true>
 	constexpr bool cmp_less_equal(T t, U u) noexcept {
 		return !cmp_greater(t, u);
 	}
 
-	template<class T, class U>
+	template<class T, class U, isl::enable_if_t<
+		isl::is_arithmetic_v<T> && isl::is_arithmetic_v<U>, bool
+	> = true>
 	constexpr bool cmp_greater_equal(T t, U u) noexcept {
 		return !cmp_less(t, u);
 	}
