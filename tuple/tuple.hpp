@@ -3,6 +3,8 @@
 
 #include <cstddef>
 
+// #include <iostream> // - debug
+
 // tuple_element
 namespace isl {
 	template<size_t I, class T>
@@ -31,7 +33,7 @@ namespace isl {
 
 		template<size_t I, typename T>
 		struct tuple<I, T> {
-			T value;
+			T value{};
 		};
 
 		template<typename Tuple, size_t I, typename Type>
@@ -50,51 +52,84 @@ namespace isl {
 			);
 		}
 
+		// get_underlying
+
+		template<typename Tuple, size_t I>
+		auto& __get_underlying(Tuple& t) {
+			return __get_element<Tuple, I>(t).value;
+		}
+
+		// construct_element
+
 		template<typename Tuple, size_t I, typename T>
 		void __construct_element(
 			Tuple& t,
 			T&& value
 		) {
-			__get_element<Tuple, I>(t)(isl::forward<T>(value))
+			__get_underlying<Tuple, I>(t)(isl::forward<T>(value));
 		}
+
+		// set_element
 
 		template<typename Tuple, size_t I, typename T>
 		void __set_element(
 			Tuple& t,
 			T&& value
 		) {
-			__get_element<Tuple, I>(t) = isl::forward<T>(value)
+			__get_underlying<Tuple, I>(t) = isl::forward<T>(value);
 		}
 
+		// Default initialization
+
+		template<typename Tuple, size_t... I>
+		void __initialize_default(Tuple& t, std::index_sequence<I...>) {
+			(..., (__get_element<Tuple, I>(t) = tuple<I, tuple_element_t<I, Tuple>>()));
+		}
+
+		template<size_t N, typename Tuple>
+		void __initialize_default(Tuple& t) {
+			__initialize_default<Tuple>(t,std::make_index_sequence<N>());
+		}
+
+		// Fill initialization
 
 		template<typename Tuple, typename T, size_t... I>
-		void __initialize(Tuple& t, T&& value) {
-			(..., __set_element<Tuple, I, T>(
+		void __initialize_fill(Tuple& t, T&& value, std::index_sequence<I...>) {
+			(..., __construct_element<Tuple, I, T>(
 				t, isl::forward<T>(value)
 			));
 		}
 
+		template<typename Tuple, typename T>
+		void __initialize_fill(Tuple& t, T&& value) {
+			__initialize_fill(t, std::forward<T>(value),
+				std::make_index_sequence<t.size>()
+			);
+		}
+
+		// Initialization with certain values
+
 		template<typename Tuple, size_t I, typename Arg>
-		void __initialize(Tuple& t, Arg&& value) {
-			__set_element<Tuple, I, Arg>(
+		void __initialize_values(Tuple& t, Arg&& value) {
+			__construct_element<Tuple, I, Arg>(
 				t, isl::forward<Arg>(value)
 			);
 		}
 
 		template<typename Tuple, size_t I, size_t... N, typename Arg, typename... Args>
-		void __initialize(Tuple& t, Arg&& value, Args&&... args) {
-			__initialize<Tuple, I, Arg>(t, isl::forward<Arg>(value));
-			__initialize<Tuple, N..., Args...>(t, isl::forward<Args>(args)...);
+		void __initialize_values(Tuple& t, Arg&& value, Args&&... args) {
+			__initialize_values<Tuple, I, Arg>(t, isl::forward<Arg>(value));
+			__initialize_values<Tuple, N..., Args...>(t, isl::forward<Args>(args)...);
 		}
 
 		template<typename Tuple, typename... Args, size_t... I>
-		void __initialize(Tuple& t, Args&&... args, std::index_sequence<I...>) {
-			__initialize<Tuple, I..., Args...>(t, isl::forward<Args>(args)...);
+		void __initialize_values(Tuple& t, Args&&... args, std::index_sequence<I...>) {
+			__initialize_values<Tuple, I..., Args...>(t, isl::forward<Args>(args)...);
 		}
 
 		template<typename Tuple, typename... Args>
-		void __initialize(Tuple& t, Args&&... args) {
-			__initialize<Tuple, Args...>(
+		void __initialize_values(Tuple& t, Args&&... args) {
+			__initialize_values<Tuple, Args...>(
 				t, args..., std::index_sequence_for<Args...>()
 			);
 		}
@@ -108,7 +143,7 @@ namespace isl {
 			(... || !isl::__is_implicit_default_constructible_v<Types>)
 		) constexpr tuple() requires(
 			(... && isl::is_default_constructible_v<Types>)
-		) {}
+		) { }
 	};
 
 	template<class... UTypes>
