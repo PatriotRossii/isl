@@ -18,7 +18,19 @@ TEST(utility, TestTupleDefaultConstructor) {
 }
 
 TEST(utility, TestTupleArgumentConstruction) {
-    
+    isl::tuple<int, double, std::string> pair{
+        5, 2.0, "Hello"
+    };
+
+    ASSERT_EQ(
+        isl::get<0>(pair), 5
+    );
+    ASSERT_EQ(
+        isl::get<1>(pair), 2.0
+    );
+    ASSERT_EQ(
+        isl::get<2>(pair), "Hello"
+    );
 }
 
 int main(int argc, char *argv[]) {
