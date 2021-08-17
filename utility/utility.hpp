@@ -34,18 +34,16 @@ namespace isl {
 		> = true
 	>
 	constexpr void swap(T2 (&a)[N], T2 (&b)[N]) noexcept(
-		std::is_nothrow_swappable_v<T2>
+		isl::is_nothrow_swappable_v<T2>
 	) {
 		std::swap_ranges(a, a + N, b);
 	}
 
-	// exchange
+	// move
 
-	template<class T, class U = T>
-	constexpr T exchange(T& obj, U&& new_value) {
-		T old_value = std::move(obj);
-		obj = std::forward<U>(new_value);
-		return old_value;
+	template<class T>
+	constexpr isl::remove_reference_t<T>&& move(T&& t) noexcept {
+		return static_cast<isl::remove_reference_t<T>&&>(t);
 	}
 
 	// forward
@@ -66,11 +64,13 @@ namespace isl {
 		return static_cast<T&&>(t); 
 	}
 
-	// move
+	// exchange
 
-	template<class T>
-	constexpr isl::remove_reference_t<T>&& move(T&& t) noexcept {
-		return static_cast<isl::remove_reference_t<T>&&>(t);
+	template<class T, class U = T>
+	constexpr T exchange(T& obj, U&& new_value) {
+		T old_value = isl::move(obj);
+		obj = isl::forward<U>(new_value);
+		return old_value;
 	}
 
 	// move_if_noexcept
@@ -176,7 +176,7 @@ namespace isl {
 
 	template<size_t I, class Head, class... Tail>
 	struct tuple_element<I, tuple<Head, Tail...>>
-		: std::tuple_element<I - 1, tuple<Tail...>> { };
+		: isl::tuple_element<I - 1, tuple<Tail...>> { };
 
 	template<class Head, class... Tail>
 	struct tuple_element<0, tuple<Head, Tail...>> {
@@ -220,32 +220,32 @@ namespace isl {
 			Tuple& t,
 			T&& value
 		) {
-			__get_element<Tuple, I>(t) = std::forward<T>(value);
+			__get_element<Tuple, I>(t) = isl::forward<T>(value);
 		}
 
 		template<typename Tuple, typename T, size_t... I>
 		void __initialize(Tuple& t, T&& value) {
 			(..., __set_element<Tuple, I, T>(
-				t, std::forward<T>(value)
+				t, isl::forward<T>(value)
 			));
 		}
 
 		template<typename Tuple, size_t I, typename Arg>
 		void __initialize(Tuple& t, Arg&& value) {
 			__set_element<Tuple, I, Arg>(
-				t, std::forward<Arg>(value)
+				t, isl::forward<Arg>(value)
 			);
 		}
 
 		template<typename Tuple, size_t I, size_t... N, typename Arg, typename... Args>
 		void __initialize(Tuple& t, Arg&& value, Args&&... args) {
-			__initialize<Tuple, I, Arg>(t, std::forward<Arg>(value));
-			__initialize<Tuple, N..., Args...>(t, std::forward<Args>(args)...);
+			__initialize<Tuple, I, Arg>(t, isl::forward<Arg>(value));
+			__initialize<Tuple, N..., Args...>(t, isl::forward<Args>(args)...);
 		}
 
 		template<typename Tuple, typename... Args, size_t... I>
 		void __initialize(Tuple& t, Args&&... args, std::index_sequence<I...>) {
-			__initialize<Tuple, I..., Args...>(t, std::forward<Args>(args)...);
+			__initialize<Tuple, I..., Args...>(t, isl::forward<Args>(args)...);
 		}
 
 		template<typename Tuple, typename... Args>
@@ -302,7 +302,7 @@ namespace isl {
 		) constexpr pair(U1&& x, U2&& y) requires (
 			isl::is_constructible_v<first_type, U1&&> &&
 			isl::is_constructible_v<second_type, U2&&>
-		): first(std::forward<U1>(x)), second(std::forward<U2>(y)) { }
+		): first(isl::forward<U1>(x)), second(isl::forward<U2>(y)) { }
 
 		template<class U1, class U2>
 		explicit(
@@ -324,8 +324,8 @@ namespace isl {
 
 		template<class... Args1, class... Args2>
 		constexpr pair(std::piecewise_construct_t,
-			std::tuple<Args1...> first_args,
-			std::tuple<Args2...> second_args):
+			isl::tuple<Args1...> first_args,
+			isl::tuple<Args2...> second_args):
 				first(isl::forward<Args1>(first_args)...),
 				second(isl::forward<Args2>(second_args)...) { }
 
@@ -364,8 +364,8 @@ namespace isl {
 		constexpr pair& operator=(pair<U1,U2>&& other) requires(
 			isl::is_assignable_v<first_type&, U1> && isl::is_assignable_v<second_type&, U2>
 		) {
-			first = std::forward<U1>(other.first);
-			second = std::forward<U2>(other.second);
+			first = isl::forward<U1>(other.first);
+			second = isl::forward<U2>(other.second);
 		}
 		constexpr void swap(pair& other) noexcept(
 		    isl::is_nothrow_swappable_v<first_type> &&
@@ -433,65 +433,65 @@ namespace isl {
 	}
 
 	template<std::size_t I, class... Types>
-	typename std::tuple_element<I, tuple<Types...> >::type&&
+	typename isl::tuple_element<I, tuple<Types...> >::type&&
 	    get(tuple<Types...>&& t) noexcept {
-		return isl::forward<std::tuple_element<I, tuple<Types...> >::type>(
+		return isl::forward<isl::tuple_element<I, tuple<Types...> >::type>(
 			detail::__get_element<tuple<Types...>, I>(t)
 		);
 	}
 
 	template<std::size_t I, class... Types>
-	typename std::tuple_element<I, tuple<Types...>>::type const&
+	typename isl::tuple_element<I, tuple<Types...>>::type const&
 	    get(const tuple<Types...>& t) noexcept {
 		return detail::__get_element<tuple<Types...>, I>(t);
 	}
 
 	template<std::size_t I, class... Types>
-	typename std::tuple_element<I, tuple<Types...>>::type const&&
+	typename isl::tuple_element<I, tuple<Types...>>::type const&&
 	    get(const tuple<Types...>&& t) noexcept {
-		return isl::forward<std::tuple_element<I, tuple<Types...> >::type>(
+		return isl::forward<isl::tuple_element<I, tuple<Types...> >::type>(
 			detail::__get_element<tuple<Types...>, I>(t)
 		);
 	}
 
 	template <class T, class U>
-	constexpr T& get(std::pair<T, U>& p) noexcept {
+	constexpr T& get(isl::pair<T, U>& p) noexcept {
 		return p.first;
 	}
 
 	template <class T, class U>
-	constexpr const T& get(const std::pair<T, U>& p) noexcept {
+	constexpr const T& get(const isl::pair<T, U>& p) noexcept {
 		return p.first;
 	}
 
 	template <class T, class U>
-	constexpr T&& get(std::pair<T, U>&& p) noexcept {
+	constexpr T&& get(isl::pair<T, U>&& p) noexcept {
 		return isl::forward<T>(p.first);
 	}
 
 	template <class T, class U>
-	constexpr const T&& get(const std::pair<T, U>&& p) noexcept {
+	constexpr const T&& get(const isl::pair<T, U>&& p) noexcept {
 		return isl::forward<T>(p.first);
 	}
 
 	template <class T, class U>
-	constexpr T& get(std::pair<U, T>& p) noexcept {
+	constexpr T& get(isl::pair<U, T>& p) noexcept {
 		return p.second;
 
 	}
 
 	template <class T, class U>
-	constexpr const T& get(const std::pair<U, T>& p) noexcept {
+	constexpr const T& get(const isl::pair<U, T>& p) noexcept {
 		return p.second;
 	}
 
 	template <class T, class U>
-	constexpr T&& get(std::pair<U, T>&& p) noexcept {
+	constexpr T&& get(isl::pair<U, T>&& p) noexcept {
 		return isl::forward<T>(p.second);
 	}
 
 	template <class T, class U>
-	constexpr const T&& get(const std::pair<U, T>&& p) noexcept {
+	constexpr const T&& get(const isl::pair<U, T>&& p) noexcept {
 		return isl::forward<T>(p.second);
 	}
 }
