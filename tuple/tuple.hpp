@@ -139,6 +139,8 @@ namespace isl {
 	public:
 		detail::tuple<0, Types...> head;
 
+		// constructors
+
 		explicit(
 			(... || !isl::__is_implicit_default_constructible_v<Types>)
 		) constexpr tuple() requires(
@@ -220,7 +222,20 @@ namespace isl {
 
 		tuple(const tuple& other) = default;
 		tuple(tuple&& other) = default;
+
+		// swap
+
+		constexpr void swap(tuple& other) noexcept(
+			(... && isl::is_nothrow_swappable_v<Types>)
+		) {
+			isl::swap(
+				this->head,
+				other->head
+			);
+		}
 	};
+
+	// deduction guides
 
 	template<class... UTypes>
 	tuple(UTypes...) -> tuple<UTypes...>;
@@ -231,6 +246,8 @@ namespace isl {
 // non-member functions
 
 namespace isl {
+	// get
+
 	template<std::size_t I, class... Types>
 	constexpr isl::tuple_element_t<I, tuple<Types...>>&
 	get(tuple<Types...>& t) noexcept {
@@ -259,12 +276,16 @@ namespace isl {
 		);
 	}
 
+	// make_tuple
+
 	template<class... Types>
 	isl::tuple<detail::pair_type<Types>...> make_tuple(Types&&... args) {
 		return tuple(
 			std::forward<Types>(args)...
 		);
 	}
+
+	// tie
 
 	template<class... Types>
 	constexpr isl::tuple<Types&...> tie(Types&... args) noexcept {
@@ -310,6 +331,8 @@ namespace isl {
 			std::forward<Tuples>(args)...
 		);
 	}
+
+	// forward_as_tuple
 
 	template<class... Types>
 	constexpr tuple<Types&&...> forward_as_tuple(Types&&... args) noexcept {
