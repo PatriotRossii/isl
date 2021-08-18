@@ -1,3 +1,6 @@
+#ifndef FUNCTIONAL_ISL__HEADER
+#define FUNCTIONAL_ISL__HEADER
+
 #include "../utility/utility.hpp"
 
 namespace isl {
@@ -46,6 +49,12 @@ namespace isl {
 	template<> struct bit_or<void>;
 	template<> struct bit_xor<void>;
 	template<> struct bit_not<void>;
+
+	template<class>
+	class function;
+
+	template<class R, class... Args>
+	class function<R(Args...)>;
 }
 
 namespace isl {
@@ -355,3 +364,27 @@ namespace isl {
 		}
 	};
 }
+
+// function
+namespace isl {
+	template<class R, class... Args>
+	class function<R(Args...)> {
+		R(*target)(Args...){nullptr};
+	public:
+		using result_type = R;
+
+		function() noexcept { }
+		function(std::nullptr_t) noexcept { }
+		function(const function& other): target(other.target) { };
+		function(function&& other) noexcept: target(isl::move(other.target)) { }
+
+		template<class F>
+		function(F&& f) requires(
+			isl::is_same_v<R(Args...), F>,
+			requires(F&& f) {
+				{ f() };
+			}
+		): target(isl::forward<F>(f)) { }
+	};
+}
+#endif
