@@ -49,6 +49,8 @@ namespace isl {
 }
 
 namespace isl {
+	// arithmetic operations
+	
 	template<class T>
 	struct plus {
 		constexpr T operator()(const T& lhs, const T& rhs) const {
@@ -61,7 +63,87 @@ namespace isl {
 		template<class T, class U>
 		constexpr auto operator()(T&& lhs, U&& rhs) const
 			-> decltype(isl::forward<T>(lhs) + isl::forward<U>(rhs)) {
-			return lhs + rhs;
+			return isl::forward<T>(lhs) + isl::forward<U>(rhs);
+		}
+	};
+
+	template<class T>
+	struct minus {
+		constexpr T operator()(const T& lhs, const T& rhs) const {
+			return lhs - rhs;
+		}
+	};
+
+	template<>
+	struct minus<> {
+		template<class T, class U>
+		constexpr auto operator()(T&& lhs, U&& rhs) const
+			-> decltype(isl::forward<T>(lhs) - isl::forward<U>(rhs)) {
+			return isl::forward<T>(lhs) - isl::forward<U>(rhs);
+		}
+	};
+
+	template<class T>
+	struct multiplies {
+		constexpr T operator()(const T& lhs, const T& rhs) const {
+			return lhs * rhs;
+		}
+	};
+
+	template<>
+	struct multiplies<> {
+		template<class T, class U>
+		constexpr auto operator()(T&& lhs, U&& rhs) const
+			-> decltype(isl::forward<T>(lhs) * isl::forward<U>(rhs)) {
+			return isl::forward<T>(lhs) * isl::forward<U>(rhs);
+		}
+	};
+
+	template<class T>
+	struct divides {
+		constexpr T operator()(const T& lhs, const T& rhs) const {
+			return lhs / rhs;
+		}
+	};
+
+	template<>
+	struct divides<> {
+		template<class T, class U>
+		constexpr auto operator()(T&& lhs, U&& rhs) const
+			-> decltype(isl::forward<T>(lhs) / isl::forward<U>(rhs)) {
+			return isl::forward<T>(lhs) / isl::forward<U>(rhs);
+		}
+	};
+
+	template<class T>
+	struct modulus {
+		constexpr T operator()(const T& lhs, const T& rhs) const {
+			return lhs % rhs;
+		}
+	};
+
+	template<>
+	struct modulus<> {
+		template<class T, class U>
+		constexpr auto operator()(T&& lhs, U&& rhs) const
+			-> decltype(isl::forward<T>(lhs) % isl::forward<U>(rhs)) {
+			return isl::forward<T>(lhs) % isl::forward<U>(rhs);
+		}
+	};
+
+	template<class T>
+	struct negate {
+		constexpr T operator()(const T& lhs) const {
+			return -lhs;
+		}
+	};
+
+	template<>
+	struct negate<> {
+		template<class T>
+		constexpr auto operator()(T&& lhs) const
+			-> decltype(-isl::forward<T>(lhs)) {
+			return -isl::forward<T>(lhs);
 		}
 	};
 }
