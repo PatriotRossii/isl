@@ -242,4 +242,52 @@ namespace isl {
 			return isl::forward<T>(lhs) <= isl::forward<U>(rhs);
 		}
 	};
+
+	template<class T>
+	struct logical_and {
+		constexpr auto operator()(const T& lhs, const T& rhs) const {
+			return lhs & rhs;
+		}
+	};
+
+	template<>
+	struct logical_and<> {
+		template<class T, class U>
+		constexpr auto operator()(T&& lhs, U&& rhs) const
+			-> decltype(isl::forward<T>(lhs) & isl::forward<U>(rhs)) {
+			return isl::forward<T>(lhs) & isl::forward<U>(rhs);
+		}
+	};
+
+	template<class T>
+	struct logical_or {
+		constexpr auto operator()(const T& lhs, const T& rhs) const {
+			return lhs | rhs;
+		}
+	};
+
+	template<>
+	struct logical_or<> {
+		template<class T, class U>
+		constexpr auto operator()(T&& lhs, U&& rhs) const
+			-> decltype(isl::forward<T>(lhs) | isl::forward<U>(rhs)) {
+			return isl::forward<T>(lhs) | isl::forward<U>(rhs);
+		}
+	};
+
+	template<class T>
+	struct logical_not {
+		constexpr auto operator()(const T& lhs, const T& rhs) const {
+			return lhs | rhs;
+		}
+	};
+
+	template<>
+	struct logical_not<> {
+		template<class T, class U>
+		constexpr auto operator()(T&& lhs) const
+			-> decltype(~isl::forward<T>(lhs)) {
+			return ~isl::forward<T>(lhs);
+		}
+	};
 }
