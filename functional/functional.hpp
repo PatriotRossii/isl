@@ -50,7 +50,7 @@ namespace isl {
 
 namespace isl {
 	// arithmetic operations
-	
+
 	template<class T>
 	struct plus {
 		constexpr T operator()(const T& lhs, const T& rhs) const {
@@ -144,6 +144,102 @@ namespace isl {
 		constexpr auto operator()(T&& lhs) const
 			-> decltype(-isl::forward<T>(lhs)) {
 			return -isl::forward<T>(lhs);
+		}
+	};
+
+	template<class T>
+	struct equal_to {
+		constexpr auto operator()(const T& lhs, const T& rhs) const {
+			return lhs == rhs;
+		}
+	};
+
+	template<>
+	struct equal_to<> {
+		template<class T, class U>
+		constexpr auto operator()(T&& lhs, U&& rhs) const
+			-> decltype(isl::forward<T>(lhs) == isl::forward<U>(rhs)) {
+			return isl::forward<T>(lhs) == isl::forward<U>(rhs);
+		}
+	};
+
+	template<class T>
+	struct not_equal_to {
+		constexpr auto operator()(const T& lhs, const T& rhs) const {
+			return lhs != rhs;
+		}
+	};
+
+	template<>
+	struct not_equal_to<> {
+		template<class T, class U>
+		constexpr auto operator()(T&& lhs, U&& rhs) const
+			-> decltype(isl::forward<T>(lhs) != isl::forward<U>(rhs)) {
+			return isl::forward<T>(lhs) != isl::forward<U>(rhs);
+		}
+	};
+
+	template<class T>
+	struct greater {
+		constexpr auto operator()(const T& lhs, const T& rhs) const {
+			return lhs > rhs;
+		}
+	};
+
+	template<>
+	struct greater<> {
+		template<class T, class U>
+		constexpr auto operator()(T&& lhs, U&& rhs) const
+			-> decltype(isl::forward<T>(lhs) > isl::forward<U>(rhs)) {
+			return isl::forward<T>(lhs) > isl::forward<U>(rhs);
+		}
+	};
+
+	template<class T>
+	struct less {
+		constexpr auto operator()(const T& lhs, const T& rhs) const {
+			return lhs < rhs;
+		}
+	};
+
+	template<>
+	struct less<> {
+		template<class T, class U>
+		constexpr auto operator()(T&& lhs, U&& rhs) const
+			-> decltype(isl::forward<T>(lhs) < isl::forward<U>(rhs)) {
+			return isl::forward<T>(lhs) < isl::forward<U>(rhs);
+		}
+	};
+
+	template<class T>
+	struct greater_equal {
+		constexpr auto operator()(const T& lhs, const T& rhs) const {
+			return lhs >= rhs;
+		}
+	};
+
+	template<>
+	struct greater_equal<> {
+		template<class T, class U>
+		constexpr auto operator()(T&& lhs, U&& rhs) const
+			-> decltype(isl::forward<T>(lhs) >= isl::forward<U>(rhs)) {
+			return isl::forward<T>(lhs) >= isl::forward<U>(rhs);
+		}
+	};
+
+	template<class T>
+	struct less_equal {
+		constexpr auto operator()(const T& lhs, const T& rhs) const {
+			return lhs <= rhs;
+		}
+	};
+
+	template<>
+	struct less_equal<> {
+		template<class T, class U>
+		constexpr auto operator()(T&& lhs, U&& rhs) const
+			-> decltype(isl::forward<T>(lhs) <= isl::forward<U>(rhs)) {
+			return isl::forward<T>(lhs) <= isl::forward<U>(rhs);
 		}
 	};
 }
