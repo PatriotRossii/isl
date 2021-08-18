@@ -1,3 +1,6 @@
+#ifndef UTILITY_ISL__HEADER
+#define UTILITY_ISL__HEADER
+
 #include "synopsis.hpp"
 
 #include "../type_traits/type_traits.hpp"
@@ -367,3 +370,4 @@ namespace isl {
 		return isl::forward<T>(p.second);
 	}
 }
+#endif
