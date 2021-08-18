@@ -270,4 +270,44 @@ namespace isl {
 	constexpr isl::tuple<Types&...> tie(Types&... args) noexcept {
 		return {args...};
 	}
+
+	// tuple_cat
+
+	template<template <class...> typename Tuple, typename... ATypes>
+	Tuple<ATypes...> tuple_cat(Tuple<ATypes...>&& a) {
+		return a;
+	}
+
+	template<template <class...> typename Tuple, typename... ATypes, typename... BTypes, size_t... I, size_t... N>
+	Tuple<ATypes..., BTypes...> tuple_cat(Tuple<ATypes...>&& a, Tuple<BTypes...>&& b, std::index_sequence<I...>, std::index_sequence<N...>) {
+		return Tuple<ATypes..., BTypes...>{
+			isl::get<I>(a)..., isl::get<N>(b)...
+		};
+	}
+
+	template<template <class...> typename Tuple, typename... ATypes, typename... BTypes>
+	Tuple<ATypes..., BTypes...> tuple_cat(Tuple<ATypes...>&& a, Tuple<BTypes...>&& b) {
+		return tuple_cat(
+			isl::forward<Tuple<ATypes...>>(a),
+			isl::forward<Tuple<BTypes...>>(b),
+			std::make_index_sequence<sizeof...(ATypes)>{}, std::make_index_sequence<sizeof...(BTypes)>{}
+		);
+	}
+
+	template<template <class...> typename Tuple, typename... ATypes, typename... BTypes, typename... Tuples>
+	Tuple<ATypes..., BTypes...> tuple_cat(Tuple<ATypes...>&& a, Tuple<BTypes...>&& b, Tuples&&... args) {
+		return tuple_cat(
+			tuple_cat(
+				isl::forward<Tuple<ATypes...>>(a), isl::forward<Tuple<BTypes...>>(b)
+			),
+			isl::forward<Tuples>(args)...
+		);
+	}
+
+	template<typename... Tuples>
+	auto tuple_cat(Tuples&&... args) {
+		return tuple_cat(
+			std::forward<Tuples>(args)...
+		);
+	}
 }
