@@ -55,6 +55,9 @@ namespace isl {
 
 	template<class R, class... Args>
 	class function<R(Args...)>;
+
+	template<class T>
+	class reference_wrapper;
 }
 
 namespace isl {
@@ -385,6 +388,29 @@ namespace isl {
 				{ f() };
 			}
 		): target(isl::forward<F>(f)) { }
+
+		function& operator=(const function& other) {
+			this->target = other->target;
+		}
+		function& operator=(function&& other) {
+			this->target = std::move(other->target);
+		}
+		function& operator=(std::nullptr_t) noexcept {
+			this->target = nullptr;
+		}
+		template<class F>
+		function& operator=(F&& f) requires(
+			isl::is_same_v<R(Args...), F>,
+			requires(F&& f) {
+				{ f() };
+			}
+		) {
+			this->target = isl::forward<F>(f.target);
+		}
+		template<class F>
+		function& operator=(isl::reference_wrapper<F> f) noexcept {
+			this->target = f().target;
+		}
 	};
 }
 #endif
