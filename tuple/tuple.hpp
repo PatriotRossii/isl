@@ -310,4 +310,11 @@ namespace isl {
 			std::forward<Tuples>(args)...
 		);
 	}
+
+	template<class... Types>
+	constexpr tuple<Types&&...> forward_as_tuple(Types&&... args) noexcept {
+		return std::tuple<Types&&...>(
+			isl::forward<Types>(args)...
+		);
+	}
 }
