@@ -284,10 +284,74 @@ namespace isl {
 
 	template<>
 	struct logical_not<> {
-		template<class T, class U>
+		template<class T>
 		constexpr auto operator()(T&& lhs) const
 			-> decltype(!isl::forward<T>(lhs)) {
 			return !isl::forward<T>(lhs);
+		}
+	};
+
+	template<class T>
+	struct bit_and {
+		constexpr auto operator()(const T& lhs, const T& rhs) const {
+			return lhs & rhs;
+		}
+	};
+
+	template<>
+	struct bit_and<> {
+		template<class T, class U>
+		constexpr auto operator()(T&& lhs, U&& rhs) const
+			-> decltype(isl::forward<T>(lhs) & isl::forward<U>(rhs)) {
+			return isl::forward<T>(lhs) & isl::forward<U>(rhs);
+		}
+	};
+
+	template<class T>
+	struct bit_or {
+		constexpr auto operator()(const T& lhs, const T& rhs) const {
+			return lhs | rhs;
+		}
+	};
+
+	template<>
+	struct bit_or<> {
+		template<class T, class U>
+		constexpr auto operator()(T&& lhs, U&& rhs) const
+			-> decltype(isl::forward<T>(lhs) | isl::forward<U>(rhs)) {
+			return isl::forward<T>(lhs) | isl::forward<U>(rhs);
+		}
+	};
+
+	template<class T>
+	struct bit_xor {
+		constexpr auto operator()(const T& lhs, const T& rhs) const {
+			return lhs ^ rhs;
+		}
+	};
+
+	template<>
+	struct bit_xor<> {
+		template<class T, class U>
+		constexpr auto operator()(T&& lhs, U&& rhs) const
+			-> decltype(isl::forward<T>(lhs) ^ isl::forward<U>(rhs)) {
+			return isl::forward<T>(lhs) ^ isl::forward<U>(rhs);
+		}
+	};
+
+	template<class T>
+	struct bit_not {
+		constexpr auto operator()(const T& lhs) const {
+			return ~lhs;
+		}
+	};
+
+	template<>
+	struct bit_not<> {
+		template<class T>
+		constexpr auto operator()(T&& lhs) const
+			-> decltype(~isl::forward<T>(lhs)) {
+			return ~isl::forward<T>(lhs);
 		}
 	};
 }
