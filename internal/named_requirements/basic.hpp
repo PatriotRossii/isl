@@ -94,4 +94,9 @@ namespace isl::internal {
 	concept CopyAssignable = isl::is_same_v<
 		decltype(test_copy_assignable<T>()), bool
 	>;
+
+	template<typename T>
+	concept Destructible = requires(T u) {
+		{ u.~T() } noexcept;
+	};
 }
