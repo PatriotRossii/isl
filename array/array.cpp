@@ -1,12 +1,17 @@
+module;
+
 #include <compare>
 #include <initializer_list>
 
 #include <iterator> // std::reverse_iterator
 #include <stdexcept> // std::out_of_range
 
-#include "../utility/utility.hpp"
+export module array;
+
+import type_traits;
+import utility;
  
-namespace isl {
+export namespace isl {
 	template<class T, size_t N>
 	struct array {
 		T __storage[N];
