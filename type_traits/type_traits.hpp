@@ -1,3 +1,6 @@
+#ifndef TYPE_TRAITS__HEADER
+#define TYPE_TRAITS__HEADER
+
 #include <utility> // std::declval
 #include <cstddef> // std::nullptr_t
 
@@ -790,3 +793,4 @@ namespace isl {
         !bool(B::value)
     > { };
 }
+#endif

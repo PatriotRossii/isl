@@ -1,3 +1,6 @@
+#ifndef TUPLE_ISL__HEADER
+#define TUPLE_ISL__HEADER
+
 #include "synopsis.hpp"
 #include "../utility/utility.hpp"
 
@@ -341,3 +344,4 @@ namespace isl {
 		);
 	}
 }
+#endif
