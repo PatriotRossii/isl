@@ -1,34 +1,23 @@
 #include <gtest/gtest.h>
 #include "../basic.hpp"
 
-namespace DefaultConstructible {
-    template<typename T>
-    bool accept_default_constructible() requires(
-        isl::internal::DefaultConstructible<T>
-    ) {
-        return true;
-    }
-    template<typename T>
-    bool accept_default_constructible() {
-        return false;
-    }
-
+namespace DefaultConstructibleTest {
     struct C {
         C() = delete;
     };
 }
 
 TEST(basic, TestDefaultConstructible) {
-    using namespace DefaultConstructible;
+    using namespace isl::internal;
+    using namespace DefaultConstructibleTest;
 
     ASSERT_EQ(
-        accept_default_constructible<int>(), true
+        DefaultConstructible<int>, true
     );
     ASSERT_EQ(
-        accept_default_constructible<C>(), false
+        DefaultConstructible<C>, false
     );
 }
-
 
 int main(int argc, char *argv[]) {
     ::testing::InitGoogleTest(&argc, argv);
