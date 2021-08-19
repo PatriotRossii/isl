@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <string>
 
-#include "../tuple.hpp"
+import tuple;
 
 TEST(utility, TestTupleDefaultConstructor) {
     isl::tuple<int, double, std::string> pair;
