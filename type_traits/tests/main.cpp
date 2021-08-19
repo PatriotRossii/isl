@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 
-#include <type_traits> // isl::is_same
-#include <array>       // isl::array
+#include <type_traits> // std::is_same
+#include <array>       // std::array
 
-#include "../type_traits.hpp" // isl::integral_constant
+import type_traits;
 
 TEST(type_traits, TestIntegralConstant) {
     using two_t = isl::integral_constant<int, 2>;

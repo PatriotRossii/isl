@@ -1,10 +1,13 @@
 #ifndef TYPE_TRAITS__HEADER
 #define TYPE_TRAITS__HEADER
 
-#include <utility> // std::declval
-#include <cstddef> // std::nullptr_t
+module;
 
-namespace isl {
+#include <utility> // std::declval
+
+export module type_traits;
+
+export namespace isl {
   // helper class:
   template <class T, T v> struct integral_constant;
  
@@ -437,7 +440,7 @@ namespace isl {
 }
 
 // Helper classes
-namespace isl {
+export namespace isl {
     template<class T, T v> struct integral_constant {
         static constexpr T value = v;
 
@@ -455,7 +458,7 @@ namespace isl {
 }
 
 // Primary type categories
-namespace isl {
+export namespace isl {
     template<class T>
     struct is_void: isl::is_same<isl::remove_cv_t<T>, void> { };
 
@@ -584,7 +587,7 @@ namespace isl {
 }
 
 // Composite type categories
-namespace isl {
+export namespace isl {
     // is_fundamental
 
     template<class T>
@@ -619,7 +622,7 @@ namespace isl {
 }
 
 // Type properties
-namespace isl {
+export namespace isl {
     // is_const
 
     template<class T>
@@ -692,7 +695,7 @@ namespace isl {
 }
 
 // Supported operations
-namespace isl {
+export namespace isl {
     /*
         is_constructible, is_nothrow_constructible
     */
@@ -883,7 +886,7 @@ namespace isl {
 }
 
 // Property queries
-namespace isl {
+export namespace isl {
     // alignment_of
 
     template<class T>
@@ -927,7 +930,7 @@ namespace isl {
 }
 
 // Type relationships
-namespace isl {
+export namespace isl {
     // is_same
 
     template<class T, class U>
@@ -970,7 +973,7 @@ namespace isl {
 }
 
 // Const-volatility specifiers 
-namespace isl {
+export namespace isl {
     // remove_const
 
     template<class T>
@@ -1036,7 +1039,7 @@ namespace isl {
 }
 
 // References
-namespace isl {
+export namespace isl {
     // remove_reference
 
     template<class T>
@@ -1076,7 +1079,7 @@ namespace isl {
 }
 
 // Pointers
-namespace isl {
+export namespace isl {
     // remove_pointer
 
     template<class T>
@@ -1113,7 +1116,7 @@ namespace isl {
 }
 
 // Arrays
-namespace isl {
+export namespace isl {
     // remove_extent
 
     template<class T>
@@ -1143,7 +1146,7 @@ namespace isl {
 }
 
 // Miscellaneous transformations
-namespace isl {
+export namespace isl {
     // remove_cvref
 
     template<class T>
@@ -1189,7 +1192,7 @@ namespace isl {
 }
 
 // Operations on traits 
-namespace isl {
+export namespace isl {
     // conjunction
 
     template<class...>
