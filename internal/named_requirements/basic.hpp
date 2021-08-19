@@ -1,6 +1,6 @@
 #include "../../utility/utility.hpp"
 
-namespace isl::internal {
+namespace isl::internal::named_requirements {
 	namespace detail {
 		template<typename T>
 		auto test_default_constructible(int) -> decltype(
@@ -12,7 +12,7 @@ namespace isl::internal {
 
 	template<typename T>
 	concept DefaultConstructible = isl::is_same_v<
-			decltype(isl::internal::detail::test_default_constructible<T>(0)), bool
+			decltype(named_requirements::detail::test_default_constructible<T>(0)), bool
 	>;
 
 	namespace detail {
@@ -26,7 +26,7 @@ namespace isl::internal {
 
 	template<typename T>
 	concept MoveConstructible = isl::is_same_v<
-		decltype(test_move_constructible<T>(0)), bool
+		decltype(named_requirements::detail::test_move_constructible<T>(0)), bool
 	>;
 
 	namespace detail {
@@ -40,7 +40,7 @@ namespace isl::internal {
 
 	template<typename T>
 	concept CopyConstructible = isl::is_same_v<
-		decltype(test_copy_constructible<T>(0)), bool
+		decltype(named_requirements::detail::test_copy_constructible<T>(0)), bool
 	>;
 
 	namespace detail {
@@ -59,7 +59,7 @@ namespace isl::internal {
 
 	template<typename T>
 	concept MoveAssignable = isl::is_same_v<
-		decltype(test_move_assignable<T>(0)), bool
+		decltype(named_requirements::detail::test_move_assignable<T>(0)), bool
 	>;
 
 	namespace detail {
@@ -78,7 +78,7 @@ namespace isl::internal {
 
 	template<typename T>
 	concept CopyAssignable = isl::is_same_v<
-		decltype(test_copy_assignable<T>(0)), bool
+		decltype(named_requirements::detail::test_copy_assignable<T>(0)), bool
 	>;
 
 	template<typename T>
