@@ -76,9 +76,15 @@ namespace isl {
     }
  
     // capacity
-    [[nodiscard]] constexpr bool empty() const noexcept;
-    constexpr size_type size() const noexcept;
-    constexpr size_type max_size() const noexcept;
+    [[nodiscard]] constexpr bool empty() const noexcept {
+    	return N;
+    }
+    constexpr size_type size() const noexcept {
+    	return N;
+    }
+    constexpr size_type max_size() const noexcept {
+    	return N;
+    }
  
     // element access
     constexpr reference       operator[](size_type n);
