@@ -38,4 +38,19 @@ namespace isl::internal {
 	concept MoveConstructible = isl::is_same_v<
 		decltype(test_move_constructible<T>()), bool
 	>;
+
+	namespace detail {
+		template<typename T>
+		bool test_copy_constructible() {
+			T u = static_cast<T&>(isl::declval<T>());
+			T(static_cast<T&>(isl::declval<T>()));
+		}
+		template<typename T>
+		void test_copy_constructible();
+	}
+
+	template<typename T>
+	concept CopyConstructible = isl::is_same_v<
+		decltype(test_copy_constructible<T>()), bool
+	>;
 }
