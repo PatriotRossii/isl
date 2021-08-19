@@ -1,9 +1,4 @@
-#ifndef UTILITY_ISL__HEADER
-#define UTILITY_ISL__HEADER
-
-#include "../type_traits/type_traits.hpp"
-
-#include <initializer_list>
+module;
 
 #include <algorithm> // std::swap_ranges
 #include <limits> // std::numeric_limits
@@ -12,8 +7,14 @@
 
 #include <compare> // std::common_comparison_category
 #include <utility> // std::index_sequence_for
+
+#include <initializer_list>
+
+export module utility;
+
+import type_traits;
  
-namespace isl { 
+export namespace isl { 
   // exchange
   template<class T, class U = T>
     constexpr T exchange(T& obj, U&& new_val);
@@ -115,7 +116,7 @@ namespace isl {
 }
 
 // Functions
-namespace isl {
+export namespace isl {
 	// swap
 
 	template<
@@ -271,7 +272,7 @@ namespace isl {
 }
 
 // pair
-namespace isl {
+export namespace isl {
 	template<class T1, class T2>
 	struct pair {
 		using first_type = T1;
@@ -383,23 +384,23 @@ namespace isl {
 	pair(T1, T2) -> pair<T1, T2>;
 }
 
+namespace isl::detail {
+	template<typename X>
+	auto test_pair_type(std::reference_wrapper<X>) -> X&;
+	auto test_pair_type(...) -> isl::true_type;
+
+	template<typename T1,
+			 typename V1 = std::decay_t<T1>,
+			 typename D1 = decltype(test_pair_type(isl::declval<V1>()))
+			>
+	using pair_type = isl::conditional_t<
+		isl::is_same_v<D1, isl::true_type>, V1, D1
+	>;
+}
+
 // isl::pair non-member functions
-namespace isl {
+export namespace isl {
 	// make_pair
-
-	namespace detail {
-		template<typename X>
-		auto test_pair_type(std::reference_wrapper<X>) -> X&;
-		auto test_pair_type(...) -> isl::true_type;
-
-		template<typename T1,
-				 typename V1 = std::decay_t<T1>,
-				 typename D1 = decltype(test_pair_type(isl::declval<V1>()))
-				>
-		using pair_type = isl::conditional_t<
-			isl::is_same_v<D1, isl::true_type>, V1, D1
-		>;
-	}
 
 	template<class T1, class T2>
 	constexpr auto make_pair(T1&& t, T2&& u) {
@@ -471,4 +472,3 @@ namespace isl {
 		return isl::forward<T>(p.second);
 	}
 }
-#endif

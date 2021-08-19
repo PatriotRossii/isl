@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "../utility.hpp" // isl::integral_constant
+import utility;
 
 TEST(utility, TestSwap) {
     int a = 5, b = 3;
