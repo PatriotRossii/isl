@@ -1,3 +1,7 @@
+module;
+
+#include <cstddef>
+
 export module initializer_list;
 
 export namespace isl {
