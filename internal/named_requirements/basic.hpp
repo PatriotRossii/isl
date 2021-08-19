@@ -23,4 +23,19 @@ namespace isl::internal {
 	concept DefaultConstructible = isl::is_same_v<
 			decltype(test_default_constructible<T>()), bool
 	>;
+
+	namespace detail {
+		template<typename T>
+		bool test_move_constructible() {
+			T u = isl::declval<T>();
+			T(isl::declval<T>());
+		}
+		template<typename T>
+		void test_move_constructible();
+	}
+
+	template<typename T>
+	concept MoveConstructible = isl::is_same_v<
+		decltype(test_move_constructible<T>()), bool
+	>;
 }
