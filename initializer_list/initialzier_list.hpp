@@ -1,4 +1,6 @@
-namespace isl {
+export module initializer_list;
+
+export namespace isl {
   template<class E> class initializer_list {
   public:
     using value_type      = E;
