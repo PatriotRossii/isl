@@ -3,55 +3,44 @@
 namespace isl::internal {
 	namespace detail {
 		template<typename T>
-		bool test_default_constructible() {
-			T i; // Post-conditions: the object u is default-initialized
-			T j{}; // Post-conditions: the object u is value-initialized or aggregate-initialized
-	
-			// Post-conditions: A temporary object of type T is value-initialized
-			// or aggregate-initialized
-
-			T();	
-			T{};
-
-			return true;
-		}
+		auto test_default_constructible(int) -> decltype(
+			void((T(), T{})), true
+		);
 		template<typename T>
-		void test_default_constructible();
+		auto test_default_constructible(...) -> void;
 	}
 
 	template<typename T>
 	concept DefaultConstructible = isl::is_same_v<
-			decltype(test_default_constructible<T>()), bool
+			decltype(isl::internal::detail::test_default_constructible<T>(0)), bool
 	>;
 
 	namespace detail {
 		template<typename T>
-		bool test_move_constructible() {
-			T u = isl::declval<T>();
-			T(isl::declval<T>());
-		}
+		auto test_move_constructible(int) -> decltype(
+			void(T(isl::declval<T>())), true
+		);
 		template<typename T>
-		void test_move_constructible();
+		auto test_move_constructible(...) -> void;
 	}
 
 	template<typename T>
 	concept MoveConstructible = isl::is_same_v<
-		decltype(test_move_constructible<T>()), bool
+		decltype(test_move_constructible<T>(0)), bool
 	>;
 
 	namespace detail {
 		template<typename T>
-		bool test_copy_constructible() {
-			T u = static_cast<T&>(isl::declval<T>());
-			T(static_cast<T&>(isl::declval<T>()));
-		}
+		auto test_copy_constructible(int) -> decltype(
+			T(static_cast<T&>(isl::declval<T>())), true
+		);
 		template<typename T>
-		void test_copy_constructible();
+		auto test_copy_constructible(...) -> void;
 	}
 
 	template<typename T>
 	concept CopyConstructible = isl::is_same_v<
-		decltype(test_copy_constructible<T>()), bool
+		decltype(test_copy_constructible<T>(0)), bool
 	>;
 
 	namespace detail {
