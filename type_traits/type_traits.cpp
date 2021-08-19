@@ -218,7 +218,7 @@ export namespace isl {
   template <class T>
   using unwrap_ref_decay_t = typename unwrap_ref_decay<T>::type;
 
-  namespace detail {
+  namespace isl::detail {
     template<class...>
     struct make_void;
   }
@@ -454,6 +454,92 @@ export namespace isl {
     };
 }
 
+namespace isl::detail {
+    // int
+
+    template<class T>
+    struct is_integral: isl::false_type { };
+
+    template<>
+    struct is_integral<short int>: isl::true_type { };
+    template<>
+    struct is_integral<unsigned short int>: isl::true_type { };
+    template<>
+    struct is_integral<int>: isl::true_type { };
+    template<>
+    struct is_integral<unsigned int>: isl::true_type { }; 
+    template<>
+    struct is_integral<long int>: isl::true_type { };
+    template<>
+    struct is_integral<unsigned long int>: isl::true_type { }; 
+    template<>
+    struct is_integral<long long int>: isl::true_type { };
+    template<>
+    struct is_integral<unsigned long long int>: isl::true_type { };
+
+    // boolean
+
+    template<>
+    struct is_integral<bool>: isl::true_type { };
+
+    // character types
+
+    template<>
+    struct is_integral<signed char>: isl::true_type { };
+    template<>
+    struct is_integral<unsigned char>: isl::true_type { };
+    template<>
+    struct is_integral<wchar_t>: isl::true_type { };
+    template<>
+    struct is_integral<char16_t>: isl::true_type { };
+    template<>
+    struct is_integral<char32_t>: isl::true_type { };
+    template<>
+    struct is_integral<char8_t>: isl::true_type { };
+
+    template<class T>
+    struct is_floating_point: isl::false_type { };
+
+    template<>
+    struct is_floating_point<float>: isl::true_type { };
+    template<>
+    struct is_floating_point<double>: isl::true_type { };
+    template<>
+    struct is_floating_point<long double>: isl::true_type { };
+
+    template<class T>
+    struct is_pointer: isl::false_type { };
+    template<class T>
+    struct is_pointer<T*>: isl::true_type { };
+
+    template<class T>
+    struct is_member_pointer: isl::false_type { };
+    template<class T, class U>
+    struct is_member_pointer<T U::*>: isl::true_type { };
+
+    template<typename T>
+    auto test_signed(int) -> decltype(bool_constant<
+        (T(-1) < T(0)) && std::is_arithmetic_v<T> 
+    >{});
+    template<typename T>
+    auto test_signed(...) -> isl::false_type;
+
+    template<typename T>
+    auto test_unsigned(int) -> decltype(bool_constant<
+        /* T(-1) > T(0) -- funny */ (T(0) < T(-1)) && std::is_arithmetic_v<T> 
+    >{});
+    template<typename T>
+    auto test_unsigned(...) -> isl::false_type;
+
+    template<typename T>
+    auto test_abstract(int) -> decltype(
+        void(static_cast<void(*)(T)>(nullptr)(std::declval<T>())), std::false_type{}
+    );
+    template<typename T>
+    auto test_abstract(...) -> std::true_type;
+
+}
+
 // Primary type categories
 export namespace isl {
     template<class T>
@@ -464,66 +550,10 @@ export namespace isl {
 
     // is_integral
 
-    namespace detail {
-        // int
-
-        template<class T>
-        struct is_integral: isl::false_type { };
-
-        template<>
-        struct is_integral<short int>: isl::true_type { };
-        template<>
-        struct is_integral<unsigned short int>: isl::true_type { };
-        template<>
-        struct is_integral<int>: isl::true_type { };
-        template<>
-        struct is_integral<unsigned int>: isl::true_type { }; 
-        template<>
-        struct is_integral<long int>: isl::true_type { };
-        template<>
-        struct is_integral<unsigned long int>: isl::true_type { }; 
-        template<>
-        struct is_integral<long long int>: isl::true_type { };
-        template<>
-        struct is_integral<unsigned long long int>: isl::true_type { };
-
-        // boolean
-
-        template<>
-        struct is_integral<bool>: isl::true_type { };
-
-        // character types
-
-        template<>
-        struct is_integral<signed char>: isl::true_type { };
-        template<>
-        struct is_integral<unsigned char>: isl::true_type { };
-        template<>
-        struct is_integral<wchar_t>: isl::true_type { };
-        template<>
-        struct is_integral<char16_t>: isl::true_type { };
-        template<>
-        struct is_integral<char32_t>: isl::true_type { };
-        template<>
-        struct is_integral<char8_t>: isl::true_type { };
-    }
-
     template<class T>
     struct is_integral: detail::is_integral<isl::remove_cv_t<T>> { };
 
     // is_floating_point
-
-    namespace detail {
-        template<class T>
-        struct is_floating_point: isl::false_type { };
-
-        template<>
-        struct is_floating_point<float>: isl::true_type { };
-        template<>
-        struct is_floating_point<double>: isl::true_type { };
-        template<>
-        struct is_floating_point<long double>: isl::true_type { };
-    }
 
     template<class T>
     struct is_floating_point: detail::is_floating_point<isl::remove_cv_t<T>> { };
@@ -557,13 +587,6 @@ export namespace isl {
     struct is_rvalue_reference<T&&>: isl::true_type { };
 
     // std::is_pointer
-
-    namespace detail {
-        template<class T>
-        struct is_pointer: isl::false_type { };
-        template<class T>
-        struct is_pointer<T*>: isl::true_type { };
-    }
 
     template<class T>
     struct is_pointer: detail::is_pointer<isl::remove_cv_t<T>> { };
@@ -608,12 +631,6 @@ export namespace isl {
 
     // is_member_pointer
 
-    namespace detail {
-        template<class T>
-        struct is_member_pointer: isl::false_type { };
-        template<class T, class U>
-        struct is_member_pointer<T U::*>: isl::true_type { };
-    }
     template<class T>
     struct is_member_pointer: detail::is_member_pointer<isl::remove_cv_t<T>> { };
 }
@@ -636,28 +653,10 @@ export namespace isl {
 
     // is_signed
 
-    namespace detail {
-        template<typename T>
-        auto test_signed(int) -> decltype(bool_constant<
-            (T(-1) < T(0)) && std::is_arithmetic_v<T> 
-        >{});
-        template<typename T>
-        auto test_signed(...) -> isl::false_type;
-    }
-
     template<class T>
     struct is_signed: decltype(detail::test_signed<T>(0)) { };
 
     // is_unsigned
-
-    namespace detail {
-        template<typename T>
-        auto test_unsigned(int) -> decltype(bool_constant<
-            /* T(-1) > T(0) -- funny */ (T(0) < T(-1)) && std::is_arithmetic_v<T> 
-        >{});
-        template<typename T>
-        auto test_unsigned(...) -> isl::false_type;
-    }
 
     template<class T>
     struct is_unsigned: decltype(detail::test_unsigned<T>(0)) { };
@@ -678,17 +677,83 @@ export namespace isl {
 
     // is_abstract
 
-    namespace detail {
-        template<typename T>
-        auto test_abstract(int) -> decltype(
-            void(static_cast<void(*)(T)>(nullptr)(std::declval<T>())), std::false_type{}
-        );
-        template<typename T>
-        auto test_abstract(...) -> std::true_type;
-    }
-
     template<class T>
     struct is_abstract: decltype(detail::test_abstract<T>(0)) { };
+}
+
+namespace isl::detail {
+    template<class T, class... Args>
+    auto test_constructible(int) -> decltype(
+        void(T(std::declval<Args>()...)),
+        std::true_type{}
+    );
+    template<class, class...>
+    auto test_constructible(...) -> std::false_type;
+
+    template<class T, class... Args>
+    auto test_nothrow_constructible(int) -> decltype(
+        std::bool_constant<
+            noexcept(T(std::declval<Args>()...))
+        >{}
+    );
+    template<class, class...>
+    auto test_nothrow_constructible(...) -> isl::false_type;
+
+     template<class T>
+    auto test_implicit_default_construction(int) -> decltype(
+        void(static_cast<void(*)(T)>(nullptr)({})), isl::true_type{}
+    );
+    template<class T>
+    auto test_implicit_default_constructible(...) -> isl::false_type;
+
+    template<class T, class U>
+    auto test_assignable(int) -> decltype(
+        void(std::declval<T>() = std::declval<U>()),
+        isl::true_type{}
+    );
+    template<class, class>
+    auto test_assignable(...) -> isl::false_type;
+
+    template<class T, class U>
+    auto test_nothrow_assignable(int) -> decltype(
+        isl::bool_constant<
+            noexcept(std::declval<T>() = std::declval<U>())
+        >{}
+    );
+    template<class, class>
+    auto test_nothrow_assignable(...) -> isl::false_type;
+
+    template<class T, class U>
+    auto test_swappable_with(int) -> decltype(
+        void(swap(std::declval<T>(), std::declval<U>()), swap(std::declval<U>(), std::declval<T>())),
+        isl::true_type{}
+    );
+    template<class, class>
+    auto test_swappable_with(...) -> isl::false_type;
+
+    template<class T, class U>
+    auto test_nothrow_swappable_with(int) -> decltype(
+        isl::bool_constant<
+            nothrow(swap(std::declval<T>(), std::declval<U>()), swap(std::declval<U>(), std::declval<T>()))
+        >{}
+    );
+    template<class, class>
+    auto test_nothrow_swappable_with(...) -> isl::false_type;
+
+    template<class T>
+    auto test_referenceable(int) -> decltype(
+        void(static_cast<T&(*)(void)>(nullptr)()),
+        isl::true_type{}
+    );
+    template<class T>
+    auto test_referenceable(...) -> isl::false_type;
+
+    template<class T>
+    struct is_referenceable: decltype(
+        test_referenceable<T>(0)
+    ) { };
+    template<typename T>
+    inline constexpr bool is_referenceable_v = is_referenceable<T>::value;
 }
 
 // Supported operations
@@ -697,33 +762,6 @@ export namespace isl {
         is_constructible, is_nothrow_constructible
     */
 
-    namespace detail {
-        template<class T, class... Args>
-        auto test_constructible(int) -> decltype(
-            void(T(std::declval<Args>()...)),
-            std::true_type{}
-        );
-        template<class, class...>
-        auto test_constructible(...) -> std::false_type;
-
-        template<class T, class... Args>
-        auto test_nothrow_constructible(int) -> decltype(
-            std::bool_constant<
-                noexcept(T(std::declval<Args>()...))
-            >{}
-        );
-        template<class, class...>
-        auto test_nothrow_constructible(...) -> isl::false_type;
-    }
-
-    namespace detail {
-        template<class T>
-        auto test_implicit_default_construction(int) -> decltype(
-            void(static_cast<void(*)(T)>(nullptr)({})), isl::true_type{}
-        );
-        template<class T>
-        auto test_implicit_default_constructible(...) -> isl::false_type;
-    }
     template<class T>
     struct __is_implicit_default_constructible: decltype(
         detail::test_implicit_default_constructible<T>(0)
@@ -772,25 +810,6 @@ export namespace isl {
         is_assignable, is_nothrow_assignable
     */
 
-    namespace detail {
-        template<class T, class U>
-        auto test_assignable(int) -> decltype(
-            void(std::declval<T>() = std::declval<U>()),
-            isl::true_type{}
-        );
-        template<class, class>
-        auto test_assignable(...) -> isl::false_type;
-
-        template<class T, class U>
-        auto test_nothrow_assignable(int) -> decltype(
-            isl::bool_constant<
-                noexcept(std::declval<T>() = std::declval<U>())
-            >{}
-        );
-        template<class, class>
-        auto test_nothrow_assignable(...) -> isl::false_type;
-    }
-
     template<class T, class U>
     struct is_assignable:
         decltype(detail::test_assignable<T, U>(0))
@@ -822,40 +841,6 @@ export namespace isl {
         is_swappable_with, is_swappable,
         is_nothrow_swappable_with, is_nothrow_swappable
     */
-
-    namespace detail {
-        template<class T, class U>
-        auto test_swappable_with(int) -> decltype(
-            void(swap(std::declval<T>(), std::declval<U>()), swap(std::declval<U>(), std::declval<T>())),
-            isl::true_type{}
-        );
-        template<class, class>
-        auto test_swappable_with(...) -> isl::false_type;
-
-        template<class T, class U>
-        auto test_nothrow_swappable_with(int) -> decltype(
-            isl::bool_constant<
-                nothrow(swap(std::declval<T>(), std::declval<U>()), swap(std::declval<U>(), std::declval<T>()))
-            >{}
-        );
-        template<class, class>
-        auto test_nothrow_swappable_with(...) -> isl::false_type;
-
-        template<class T>
-        auto test_referenceable(int) -> decltype(
-            void(static_cast<T&(*)(void)>(nullptr)()),
-            isl::true_type{}
-        );
-        template<class T>
-        auto test_referenceable(...) -> isl::false_type;
-
-        template<class T>
-        struct is_referenceable: decltype(
-            test_referenceable<T>(0)
-        ) { };
-        template<typename T>
-        inline constexpr bool is_referenceable_v = is_referenceable<T>::value;
-    }
 
     template<class T, class U>
     struct is_swappable_with: decltype(
@@ -926,6 +911,30 @@ export namespace isl {
     > { };
 }
 
+namespace isl::detail {
+    template<class To, bool is_noexcept>
+    auto test_returnable(int) -> decltype(
+        void(static_cast<To(*)() noexcept(is_noexcept)>(nullptr)), isl::true_type{} // nullptr - nullptr can be converted to any pointer type afaik
+    );
+    template<class, bool>
+    auto test_returnable(...) -> isl::false_type;
+
+    template<class From, class To, bool is_noexcept>
+    auto test_implicitly_convertible(int) -> decltype(
+        void(std::declval<void(*)(To) noexcept(is_noexcept)>()(std::declval<From>())),
+        isl::true_type{}
+    );
+    template<class, class, bool>
+    auto test_implicitly_convertible(...) -> isl::false_type;
+
+    template<class From, class To, bool is_noexcept>
+    struct is_convertible: isl::bool_constant<
+        (decltype(detail::test_returnable<To, is_noexcept>(0))::value 
+            && decltype(detail::test_implicitly_convertible<From, To, is_noexcept>(0))::value) ||
+        (isl::is_same_v<void, From> && isl::is_same_v<void, To>)
+    >{ };
+}
+
 // Type relationships
 export namespace isl {
     // is_same
@@ -939,29 +948,6 @@ export namespace isl {
         is_convertible, is_nothrow_convertible
     */
 
-    namespace detail {
-        template<class To, bool is_noexcept>
-        auto test_returnable(int) -> decltype(
-            void(static_cast<To(*)() noexcept(is_noexcept)>(nullptr)), isl::true_type{} // nullptr - nullptr can be converted to any pointer type afaik
-        );
-        template<class, bool>
-        auto test_returnable(...) -> isl::false_type;
-
-        template<class From, class To, bool is_noexcept>
-        auto test_implicitly_convertible(int) -> decltype(
-            void(std::declval<void(*)(To) noexcept(is_noexcept)>()(std::declval<From>())),
-            isl::true_type{}
-        );
-        template<class, class, bool>
-        auto test_implicitly_convertible(...) -> isl::false_type;
-
-        template<class From, class To, bool is_noexcept>
-        struct is_convertible: isl::bool_constant<
-            (decltype(detail::test_returnable<To, is_noexcept>(0))::value 
-                && decltype(detail::test_implicitly_convertible<From, To, is_noexcept>(0))::value) ||
-            (isl::is_same_v<void, From> && isl::is_same_v<void, To>)
-        >{ };
-    }
     template<class From, class To>
     struct is_convertible: detail::is_convertible<From, To, false> { };
 
@@ -1075,6 +1061,13 @@ export namespace isl {
     };
 }
 
+namespace isl::detail {
+    template<typename T>
+    auto try_add_pointer(int) -> isl::type_identity<isl::remove_reference<T>*>;
+    template<typename T>
+    auto try_add_pointer(...) -> isl::type_identity<T>;
+}
+
 // Pointers
 export namespace isl {
     // remove_pointer
@@ -1102,12 +1095,6 @@ export namespace isl {
 
     // add_pointer
 
-    namespace detail {
-        template<typename T>
-        auto try_add_pointer(int) -> isl::type_identity<isl::remove_reference<T>*>;
-        template<typename T>
-        auto try_add_pointer(...) -> isl::type_identity<T>;
-    }
     template<class T>
     struct add_pointer: decltype(detail::try_add_pointer<T>(0)) { };
 }
@@ -1173,12 +1160,10 @@ export namespace isl {
 
     // void_t
 
-    namespace detail {
-        template<class... T>
-        struct make_void {
-            using type = void;
-        };
-    }
+    template<class... T>
+    struct make_void {
+        using type = void;
+    };
 
     // type_identity
 
