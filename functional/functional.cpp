@@ -1,9 +1,9 @@
-#ifndef FUNCTIONAL_ISL__HEADER
-#define FUNCTIONAL_ISL__HEADER
+export module functional;
 
-#include "../utility/utility.hpp"
+import type_traits;
+import utility;
 
-namespace isl {
+export namespace isl {
 	// arithmetic operations
 	template<class T = void> struct plus;
 	template<class T = void> struct minus;
@@ -60,7 +60,7 @@ namespace isl {
 	class reference_wrapper;
 }
 
-namespace isl {
+export namespace isl {
 	// arithmetic operations
 
 	template<class T>
@@ -369,7 +369,7 @@ namespace isl {
 }
 
 // function
-namespace isl {
+export namespace isl {
 	template<class R, class... Args>
 	class function<R(Args...)> {
 		R(*target)(Args...){nullptr};
@@ -413,4 +413,3 @@ namespace isl {
 		}
 	};
 }
-#endif
