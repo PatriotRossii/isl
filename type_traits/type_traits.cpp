@@ -218,7 +218,7 @@ export namespace isl {
   template <class T>
   using unwrap_ref_decay_t = typename unwrap_ref_decay<T>::type;
 
-  namespace isl::detail {
+  namespace detail {
     template<class...>
     struct make_void;
   }
