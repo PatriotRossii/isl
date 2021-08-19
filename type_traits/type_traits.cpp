@@ -1,6 +1,3 @@
-#ifndef TYPE_TRAITS__HEADER
-#define TYPE_TRAITS__HEADER
-
 module;
 
 #include <utility> // std::declval
@@ -1226,4 +1223,3 @@ export namespace isl {
         !bool(B::value)
     > { };
 }
-#endif
