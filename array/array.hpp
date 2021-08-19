@@ -2,11 +2,13 @@
 #include <initializer_list>
 
 #include <iterator> // std::reverse_iterator
-#include "../type_traits/type_traits.hpp"
+#include "../utility/utility.hpp"
  
 namespace isl {
   template<class T, size_t N>
   struct array {
+  	T __storage[N];
+
     // types
     using value_type             = T;
     using pointer                = T*;
@@ -22,24 +24,56 @@ namespace isl {
  
     // no explicit construct/copy/destroy for aggregate type
  
-    constexpr void fill(const T& u);
-    constexpr void swap(array&) noexcept(is_nothrow_swappable_v<T>);
- 
+    constexpr void fill(const T& u) {
+    	for (T& x: __storage) {
+    		x = u;
+    	}
+    }
+    constexpr void swap(array& other) noexcept(is_nothrow_swappable_v<T>) {
+    	for(int i = 0; i < N; ++i) {
+    		isl::swap(__storage[i], other[i]);
+    	}
+    }
+
     // iterators
-    constexpr iterator               begin() noexcept;
-    constexpr const_iterator         begin() const noexcept;
-    constexpr iterator               end() noexcept;
-    constexpr const_iterator         end() const noexcept;
+    constexpr iterator begin() noexcept {
+    	return __storage;
+    }
+    constexpr const_iterator begin() const noexcept {
+    	return __storage;
+    }
+    constexpr iterator end() noexcept {
+    	return __storage + N;
+    }
+    constexpr const_iterator end() const noexcept {
+    	return __storage + N;
+    }
  
-    constexpr reverse_iterator       rbegin() noexcept;
-    constexpr const_reverse_iterator rbegin() const noexcept;
-    constexpr reverse_iterator       rend() noexcept;
-    constexpr const_reverse_iterator rend() const noexcept;
+    constexpr reverse_iterator rbegin() noexcept {
+    	return std::make_reverse_iterator(this->begin());
+    }
+    constexpr const_reverse_iterator rbegin() const noexcept {
+    	return std::make_reverse_iterator(this->begin());
+    }
+    constexpr reverse_iterator rend() noexcept {
+    	return std::make_reverse_iterator(this->end());
+    }
+    constexpr const_reverse_iterator rend() const noexcept {
+    	return std::make_reverse_iterator(this->end());
+    }
  
-    constexpr const_iterator         cbegin() const noexcept;
-    constexpr const_iterator         cend() const noexcept;
-    constexpr const_reverse_iterator crbegin() const noexcept;
-    constexpr const_reverse_iterator crend() const noexcept;
+    constexpr const_iterator cbegin() const noexcept {
+    	return this->begin();
+    }
+    constexpr const_iterator cend() const noexcept {
+    	return this->end;
+    }
+    constexpr const_reverse_iterator crbegin() const noexcept {
+    	return this->rbegin();
+    }
+    constexpr const_reverse_iterator crend() const noexcept {
+    	return this->rend();
+    }
  
     // capacity
     [[nodiscard]] constexpr bool empty() const noexcept;
