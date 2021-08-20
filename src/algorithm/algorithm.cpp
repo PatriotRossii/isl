@@ -22,6 +22,16 @@ namespace isl {
     constexpr Function for_each(InputIt first, InputIt last, Function f);
     template<class InputIt, class Size, class Function>
     constexpr InputIt for_each_n(InputIt first, Size n, Function f);
+
+    template<class InputIterator, class T>
+    constexpr InputIterator find(InputIterator first, InputIterator last,
+                                 const T& value);
+    template<class InputIterator, class Predicate>
+    constexpr InputIterator find_if(InputIterator first, InputIterator last,
+                                    Predicate pred);
+    template<class InputIterator, class Predicate>
+    constexpr InputIterator find_if_not(InputIterator first, InputIterator last,
+                                        Predicate pred);
 }
 
 namespace isl {
@@ -60,5 +70,30 @@ namespace isl {
             f(*first);
         }
         return first + n;
+    }
+
+    template<class InputIterator, class T>
+    constexpr InputIterator find(InputIterator first, InputIterator last,
+                                 const T& value) {
+        for(; first != last; ++first) {
+            if(*first == value) return first;
+        }
+        return last;
+    }
+    template<class InputIterator, class Predicate>
+    constexpr InputIterator find_if(InputIterator first, InputIterator last,
+                                    Predicate pred) {
+        for(; first != last; ++first) {
+            if(pred(*first) == true) return first;
+        }
+        return last;
+    }
+    template<class InputIterator, class Predicate>
+    constexpr InputIterator find_if_not(InputIterator first, InputIterator last,
+                                        Predicate pred) {
+        for(; first != last; ++first) {
+            if(pred(*first) == false) return first;
+        }
+        return last;
     }
 }
