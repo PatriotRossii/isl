@@ -64,6 +64,11 @@ namespace isl {
     template<class InputIt, class ForwardIt, class BinaryPredicate>
     constexpr InputIt find_first_of(InputIt first, InputIt last,
                                     ForwardIt s_first, ForwardIt s_last, BinaryPredicate p);
+
+    template<class ForwardIt>
+    constexpr ForwardIt adjacent_find(ForwardIt first, ForwardIt last);
+    template<class ForwardIt, class BinaryPredicate>
+    constexpr ForwardIt adjacent_find(ForwardIt first, ForwardIt last, BinaryPredicate p);
 }
 
 namespace isl {
@@ -197,6 +202,21 @@ namespace isl {
                                     ForwardIt s_first, ForwardIt s_last, BinaryPredicate p) {
         for(; first != last; ++first) {
             for(auto it = s_first; it != s_last; ++it) if(p(*first, *it)) return first;
+        }
+        return last;
+    }
+
+    template<class ForwardIt>
+    constexpr ForwardIt adjacent_find(ForwardIt first, ForwardIt last) {
+        for(; first != last - 1; ++first) {
+            if(*first == *(first + 1)) return first;
+        }
+        return last;
+    }
+    template<class ForwardIt, class BinaryPredicate>
+    constexpr ForwardIt adjacent_find(ForwardIt first, ForwardIt last, BinaryPredicate p) {
+        for(; first != last - 1; ++first) {
+            if(p(*first, *(first + 1))) return first;
         }
         return last;
     }
