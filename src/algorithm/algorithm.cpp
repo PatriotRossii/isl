@@ -57,6 +57,13 @@ namespace isl {
     template<class InputIterator, class Predicate>
     constexpr InputIterator find_if_not(InputIterator first, InputIterator last,
                                         Predicate pred);
+
+    template<class InputIt, class ForwardIt>
+    constexpr InputIt find_first_of(InputIt first, InputIt last,
+                                    ForwardIt s_first, ForwardIt s_last);
+    template<class InputIt, class ForwardIt, class BinaryPredicate>
+    constexpr InputIt find_first_of(InputIt first, InputIt last,
+                                    ForwardIt s_first, ForwardIt s_last, BinaryPredicate p);
 }
 
 namespace isl {
@@ -174,6 +181,22 @@ namespace isl {
                                         Predicate pred) {
         for(; first != last; ++first) {
             if(pred(*first) == false) return first;
+        }
+        return last;
+    }
+    template<class InputIt, class ForwardIt>
+    constexpr InputIt find_first_of(InputIt first, InputIt last,
+                                    ForwardIt s_first, ForwardIt s_last) {
+        for(; first != last; ++first) {
+            for(auto it = s_first; it != s_last; ++it) if(*first == *it) return first;
+        }
+        return last;
+    }
+    template<class InputIt, class ForwardIt, class BinaryPredicate>
+    constexpr InputIt find_first_of(InputIt first, InputIt last,
+                                    ForwardIt s_first, ForwardIt s_last, BinaryPredicate p) {
+        for(; first != last; ++first) {
+            for(auto it = s_first; it != s_last; ++it) if(p(*first, *it)) return first;
         }
         return last;
     }
