@@ -4,11 +4,13 @@ module;
     DEBUG
 */
 
-//#include <type_traits>
+#include <type_traits>
+
+#include <iterator>
 
 export module algorithm;
 
-import type_traits;
+//import type_traits;
 
 namespace isl {
     template<class InputIt, class UnaryPredicate>
@@ -22,6 +24,13 @@ namespace isl {
     constexpr Function for_each(InputIt first, InputIt last, Function f);
     template<class InputIt, class Size, class Function>
     constexpr InputIt for_each_n(InputIt first, Size n, Function f);
+
+    template<class InputIt, class T>
+    constexpr typename std::iterator_traits<InputIt>::difference_type
+                    count(InputIt first, InputIt last, const T &value);
+    template<class InputIt, class UnaryPredicate>
+    constexpr typename std::iterator_traits<InputIt>::difference_type
+                    count_if(InputIt first, InputIt last, UnaryPredicate p); 
 
     template<class InputIterator, class T>
     constexpr InputIterator find(InputIterator first, InputIterator last,
@@ -71,6 +80,25 @@ namespace isl {
         }
         return first + n;
     }
+
+    template<class InputIt, class T>
+    constexpr typename std::iterator_traits<InputIt>::difference_type
+                    count(InputIt first, InputIt last, const T &value) {
+        typename std::iterator_traits<InputIt>::difference_type counter{0};
+        for(; first != last; ++first) {
+            if(*first == value) ++counter;
+        }
+        return counter;
+    }
+    template<class InputIt, class UnaryPredicate>
+    constexpr typename std::iterator_traits<InputIt>::difference_type
+                    count_if(InputIt first, InputIt last, UnaryPredicate p) {
+        for(; first != last; ++first) {
+            if(p(*first)) ++counter;
+        }
+        return counter;
+    }
+
 
     template<class InputIterator, class T>
     constexpr InputIterator find(InputIterator first, InputIterator last,
