@@ -143,6 +143,10 @@ export namespace isl {
 		) { }
 		constexpr vector& operator=(std::initializer_list<T> ilist) {}
 
+		template< class InputIt,
+		          class Alloc = std::allocator<typename std::iterator_traits<InputIt>::value_type>>
+		vector(InputIt, InputIt, Alloc = Alloc())
+		  -> vector<typename std::iterator_traits<InputIt>::value_type, Alloc>;
 	};
 	namespace pmr {
 		template<class T>
