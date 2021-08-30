@@ -22,7 +22,10 @@ export namespace isl {
 	> class vector {
 	private:
 		Allocator allocator;
+
 		T* storage;
+		std::size_t capacity;
+		std::size_t size;
 	public:
 		using value_type = T;
 		using allocator_type = Allocator;
@@ -46,14 +49,14 @@ export namespace isl {
 		constexpr explicit vector(const Allocator& alloc) noexcept: allocator(alloc) { }
 		constexpr vector(size_type count,
 						 const T& value,
-						 const Allocator& alloc = Allocator()): allocator(alloc) {
+						 const Allocator& alloc = Allocator()): allocator(alloc), capacity(count), size(capacity) {
 			this->storage = allocator.allocate(count);
 			std::uninitialized_fill_n(
 				storage, count, value
 			);
 		}
 		constexpr explicit vector(size_type count,
-								  const Allocator& alloc = Allocator()): allocator(alloc) {
+								  const Allocator& alloc = Allocator()): allocator(alloc), capacity(count), size(capacity) {
 			this->storage = allocator.allocate(count);
 			std::uninitialized_default_construct_n(
 				storage, count
@@ -62,7 +65,12 @@ export namespace isl {
 		template<class InputIt>
 		constexpr vector(InputIt first, InputIt last,
 						 const Allocator& alloc = Allocator()): allocator(alloc) {
-			this->storage = allocator.allocate(last - first);
+			std::size_t size = last - first;
+
+			this->storage = allocator.allocate(size);
+			this->capacity = size;
+			this->size = size;
+
 			std::copy(
 				first, last, this->begin()
 			);
@@ -72,6 +80,9 @@ export namespace isl {
 
 			this->storage = std::allocator_traits<allocator_type>::select_on_container_copy_construction(
     other.get_allocator()).allocate(other_size);
+			this->capacity = other_size;
+			this->size = other_size;
+
 			std::copy_n(
 				other.begin(), other_size, this->storage
 			);
@@ -80,6 +91,9 @@ export namespace isl {
 			size_t other_size = other.size();
 
 			this->storage = allocator.allocate(other_size);
+			this->capacity = other_size;
+			this->size = other_size;
+
 			std::copy_n(
 				other.begin(), other_size, this->storage
 			);
@@ -88,6 +102,9 @@ export namespace isl {
 			size_t other_size = other.size();
 
 			this->storage = allocator.allocate(other_size);
+			this->capacity = other_size;
+			this->size = other_size;
+
 			std::move(
 				other.storage, other.storage + other_size, this->storage
 			);
@@ -96,13 +113,21 @@ export namespace isl {
 			size_t other_size = other.size();
 
 			this->storage = allocator.allocate(other_size);
+			this->capacity = other_size;
+			this->size = other_size;
+
 			std::move(
 				other.storage, other.storage + other_size, this->storage
 			);
 		}
 		constexpr vector(std::initializer_list<T> init,
 						 const Allocator& alloc = Allocator()): allocator(alloc) {
-			this->storage = allocator.allocate(init.size());
+			size_t other_size = init.size();
+
+			this->storage = allocator.allocate(other_size);
+			this->capacity = other_size;
+			this->size = other_size;
+			
 			std::copy_n(
 				init.begin(), init.end(), storage
 			);
