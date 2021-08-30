@@ -127,10 +127,13 @@ export namespace isl {
 			this->storage = allocator.allocate(other_size);
 			this->capacity = other_size;
 			this->size = other_size;
-			
+
 			std::copy_n(
 				init.begin(), init.end(), storage
 			);
+		}
+		constexpr ~vector() {
+			allocator.deallocate(storage, capacity);
 		}
 	};
 	namespace pmr {
