@@ -135,6 +135,14 @@ export namespace isl {
 		constexpr ~vector() {
 			allocator.deallocate(storage, capacity);
 		}
+
+		constexpr vector& operator=(const vector& other) { }
+		constexpr vector& operator=(vector&& other) noexcept(
+			std::allocator_traits<Allocator>::propagate_on_container_move_assignment::value
+|| std::allocator_traits<Allocator>::is_always_equal::value
+		) { }
+		constexpr vector& operator=(std::initializer_list<T> ilist) {}
+
 	};
 	namespace pmr {
 		template<class T>
