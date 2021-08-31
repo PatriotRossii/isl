@@ -442,6 +442,31 @@ TEST(type_traits, TestIsMoveAssignable) {
     ASSERT_FALSE(isl::is_nothrow_move_assignable<IsMoveAssignable::NoMove>::value);
 }
 
+namespace IsEnum {
+    class A { };
+    enum E { };
+    enum class Ec: int { };
+    class D {
+        operator int() { return 1; }
+    };
+}
+
+TEST(type_traits, TestIsEnum) {
+    using namespace IsEnum;
+
+    constexpr bool t_class = isl::is_enum_v<A>;
+    constexpr bool t_enum = isl::is_enum_v<E>;
+    constexpr bool t_int = isl::is_enum_v<int>;
+    constexpr bool t_enum_class = isl::is_enum_v<Ec>;
+    constexpr bool t_class_int = isl::is_enum_v<D>;
+
+    ASSERT_FALSE(t_class);
+    ASSERT_TRUE(t_enum);
+    ASSERT_TRUE(t_int);
+    ASSERT_TRUE(t_enum_class);
+    ASSERT_FALSE(t_class_int);
+}
+
 int main(int argc, char *argv[]) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
