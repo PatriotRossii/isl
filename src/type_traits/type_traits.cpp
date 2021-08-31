@@ -695,7 +695,9 @@ export namespace isl {
     // is_abstract
 
     template<class T>
-    struct is_abstract: decltype(detail::test_abstract<T>(0)) { };
+    struct is_abstract: isl::bool_constant<
+    	decltype(detail::test_abstract<T>(0))::value && !isl::is_void_v<T>
+    > { };
 }
 
 namespace isl::detail {
