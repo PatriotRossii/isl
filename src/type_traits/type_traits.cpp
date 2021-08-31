@@ -538,6 +538,16 @@ namespace isl::detail {
     template<typename T>
     auto test_abstract(...) -> std::true_type;
 
+    enum Enum { };
+
+    template<typename T, auto f = []() {
+        switch(std::declval<T>()) { }
+    }>
+    auto test_enum(int) -> decltype(
+        void(static_cast<detail::Enum>(std::declval<T>())), isl::true_type{}
+    );
+    template<typename T>
+    auto test(...) -> isl::false_type;
 }
 
 // Primary type categories
@@ -566,6 +576,13 @@ export namespace isl {
     struct is_array<T[]>: isl::true_type { };
     template<class T, std::size_t N>
     struct is_array<T[N]>: isl::true_type { };
+
+    // is_enum
+
+    template<typename T>
+    struct is_enum: isl::bool_constant<
+        decltype(test<T>(0))::value && !isl::is_arithmetic_v<T>
+    > { };
 
     // is_function
 
