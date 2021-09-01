@@ -177,6 +177,10 @@ export namespace isl {
 		constexpr void assing(std::initializer_list<T> ilist) {
 			(*this) = vector(ilist);
 		}
+
+		constexpr allocator_type get_allocator() const noexcept {
+			return this->allocator;
+		}
 	};
 	namespace pmr {
 		template<class T>
