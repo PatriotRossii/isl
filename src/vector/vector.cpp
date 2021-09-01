@@ -9,6 +9,7 @@ module;
 #include <limits> // std::numeric_limits
 
 #include <stdexcept> // std::out_of_range
+#include <algorithm> // std::remove, std::remove_if
 
 export module vector;
 
@@ -288,6 +289,27 @@ export namespace isl {
 		template<class T>
 		using vector = isl::vector<T, std::pmr::polymorphic_allocator<T>>;
 	}
+
+    template<class T, class Alloc, class U>
+    constexpr typename std::vector<T, Alloc>::size_type
+        erase(std::vector<T, Alloc>& c, const U& value) {
+        auto iterator = std::remove(c, value);
+        auto distance = std::distance(iterator, c.end());
+
+        c.erase(iterator, distance);
+
+        return distance;
+    }
+    template<class T, class Alloc, class Pred>
+    constexpr typename std::vector<T, Alloc>::size_type
+        erase_if(std::vector<T, Alloc>& c, Pred pred) {
+        auto iterator = std::remove_if(c, pred);
+        auto distance = std::distance(iterator, c.end());
+
+        c.erase(iterator, distance);
+
+        return distance;
+    }
 
 	template< class InputIt,
           class Alloc = std::allocator<typename std::iterator_traits<InputIt>::value_type>>
