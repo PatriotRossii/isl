@@ -32,15 +32,18 @@ export namespace isl {
 			this->capacity_ = new_value;
 			this->size_ = new_value;
 		}
-        void reallocate(std::size_t new_capacity) {
+        void reallocate(std::size_t new_capacity, std::size_t old_capacity) {
             T* new_storage = new T[new_capacity];
             
             std::copy(
-                this->storage, this->storage + this->capacity_, new_storage
+                this->storage, this->storage + old_capacity, new_storage
             );
 
             delete[] this->storage;
             this->storage = new_storage;
+        }
+        void reallocate(std::size_t new_capacity) {
+            this->reallocate(new_capacity, this->capacity_);
         }
 	public:
 		using value_type = T;
@@ -207,7 +210,9 @@ export namespace isl {
 		constexpr size_type capacity() const noexcept {
 			return this->capacity_;
 		}
-
+        constexpr void shrink_to_fit() {
+            this->reallocate(this->size_, this->size_);
+        }
 	};
 	namespace pmr {
 		template<class T>
