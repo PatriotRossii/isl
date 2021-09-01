@@ -6,6 +6,7 @@ module;
 
 #include <initializer_list> // std::initializer_list
 #include <algorithm> // std::uninitalized_fill_n
+#include <limits> // std::numeric_limits
 
 export module vector;
 
@@ -24,12 +25,12 @@ export namespace isl {
 		Allocator allocator;
 
 		T* storage;
-		std::size_t capacity;
-		std::size_t size;
+		std::size_t capacity_;
+		std::size_t size_;
 
 		void assign_size_capacity(std::size_t new_value) {
-			this->capacity = new_value;
-			this->size = new_value;
+			this->capacity_ = new_value;
+			this->size_ = new_value;
 		}
 	public:
 		using value_type = T;
@@ -54,19 +55,15 @@ export namespace isl {
 		constexpr explicit vector(const Allocator& alloc) noexcept: allocator(alloc) { }
 		constexpr vector(size_type count,
 						 const T& value,
-						 const Allocator& alloc = Allocator()): allocator(alloc), capacity(count), size(capacity) {
+						 const Allocator& alloc = Allocator()): allocator(alloc), capacity_(count), size_(capacity) {
 			this->storage = allocator.allocate(count);
-			assign_size_capacity(count);
-
 			std::uninitialized_fill_n(
 				storage, count, value
 			);
 		}
 		constexpr explicit vector(size_type count,
-								  const Allocator& alloc = Allocator()): allocator(alloc), capacity(count), size(capacity) {
+								  const Allocator& alloc = Allocator()): allocator(alloc), capacity_(count), size_(capacity) {
 			this->storage = allocator.allocate(count);
-			assign_size_capacity(count);
-
 			std::uninitialized_default_construct_n(
 				storage, count
 			);
@@ -136,7 +133,7 @@ export namespace isl {
 			);
 		}
 		constexpr ~vector() {
-			allocator.deallocate(storage, capacity);
+			allocator.deallocate(storage, capacity_);
 		}
 
 		constexpr vector& operator=(const vector& other) {
@@ -181,6 +178,20 @@ export namespace isl {
 		constexpr allocator_type get_allocator() const noexcept {
 			return this->allocator;
 		}
+
+		[[nodiscard]] constexpr bool empty() const noexcept {
+			return this->size_;
+		}
+		constexpr size_type size() const noexcept {
+			return this->size_;
+		}
+		constexpr size_type max_size() const noexcept {
+			return std::numeric_limits<difference_type>::max();
+		}
+		constexpr size_type capacity() const noexcept {
+			return this->capacity_;
+		}
+
 	};
 	namespace pmr {
 		template<class T>
