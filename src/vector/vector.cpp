@@ -26,6 +26,11 @@ export namespace isl {
 		T* storage;
 		std::size_t capacity;
 		std::size_t size;
+
+		void assign_size_capacity(std::size_t new_value) {
+			this->capacity = new_value;
+			this->size = new_value;
+		}
 	public:
 		using value_type = T;
 		using allocator_type = Allocator;
@@ -51,6 +56,8 @@ export namespace isl {
 						 const T& value,
 						 const Allocator& alloc = Allocator()): allocator(alloc), capacity(count), size(capacity) {
 			this->storage = allocator.allocate(count);
+			assign_size_capacity(count);
+
 			std::uninitialized_fill_n(
 				storage, count, value
 			);
@@ -58,6 +65,8 @@ export namespace isl {
 		constexpr explicit vector(size_type count,
 								  const Allocator& alloc = Allocator()): allocator(alloc), capacity(count), size(capacity) {
 			this->storage = allocator.allocate(count);
+			assign_size_capacity(count);
+
 			std::uninitialized_default_construct_n(
 				storage, count
 			);
@@ -68,8 +77,7 @@ export namespace isl {
 			std::size_t size = last - first;
 
 			this->storage = allocator.allocate(size);
-			this->capacity = size;
-			this->size = size;
+			assign_size_capacity(size);
 
 			std::copy(
 				first, last, this->begin()
@@ -80,8 +88,7 @@ export namespace isl {
 
 			this->storage = std::allocator_traits<allocator_type>::select_on_container_copy_construction(
     other.get_allocator()).allocate(other_size);
-			this->capacity = other_size;
-			this->size = other_size;
+			assign_size_capacity(other_size);
 
 			std::copy_n(
 				other.begin(), other_size, this->storage
@@ -91,8 +98,7 @@ export namespace isl {
 			size_t other_size = other.size();
 
 			this->storage = allocator.allocate(other_size);
-			this->capacity = other_size;
-			this->size = other_size;
+			assign_size_capacity(other_size);
 
 			std::copy_n(
 				other.begin(), other_size, this->storage
@@ -102,8 +108,7 @@ export namespace isl {
 			size_t other_size = other.size();
 
 			this->storage = allocator.allocate(other_size);
-			this->capacity = other_size;
-			this->size = other_size;
+			assign_size_capacity(other_size);
 
 			std::move(
 				other.storage, other.storage + other_size, this->storage
@@ -113,8 +118,7 @@ export namespace isl {
 			size_t other_size = other.size();
 
 			this->storage = allocator.allocate(other_size);
-			this->capacity = other_size;
-			this->size = other_size;
+			assign_size_capacity(other_size);
 
 			std::move(
 				other.storage, other.storage + other_size, this->storage
@@ -125,8 +129,7 @@ export namespace isl {
 			size_t other_size = init.size();
 
 			this->storage = allocator.allocate(other_size);
-			this->capacity = other_size;
-			this->size = other_size;
+			assign_size_capacity(other_size);
 
 			std::copy_n(
 				init.begin(), init.end(), storage
@@ -136,21 +139,42 @@ export namespace isl {
 			allocator.deallocate(storage, capacity);
 		}
 
-		constexpr vector& operator=(const vector& other) { }
+		constexpr vector& operator=(const vector& other) {
+			size_t other_size = other.size();
+
+			assign_size_capacity(other_size);
+			std::copy(
+				other.storage, other.storage + other_size, this->storage
+			);
+		}
 		constexpr vector& operator=(vector&& other) noexcept(
 			std::allocator_traits<Allocator>::propagate_on_container_move_assignment::value
 || std::allocator_traits<Allocator>::is_always_equal::value
-		) { }
-		constexpr vector& operator=(std::initializer_list<T> ilist) {}
+		) {
+			size_t other_size = other.size();
 
-		template< class InputIt,
-		          class Alloc = std::allocator<typename std::iterator_traits<InputIt>::value_type>>
-		vector(InputIt, InputIt, Alloc = Alloc())
-		  -> vector<typename std::iterator_traits<InputIt>::value_type, Alloc>;
+			assign_size_capacity(other_size);
+			std::move(
+				other.storage, other.storage + other_size, this->storage
+			);
+		}
+		constexpr vector& operator=(std::initializer_list<T> ilist) {
+			size_t other_size = ilist.size();
+
+			assign_size_capacity(other_size);
+			std::copy(
+				ilist.begin(), ilist.end(), this->storage
+			);
+		}
 	};
 	namespace pmr {
 		template<class T>
 		using vector = isl::vector<T, std::pmr::polymorphic_allocator<T>>;
 	}
+
+	template< class InputIt,
+          class Alloc = std::allocator<typename std::iterator_traits<InputIt>::value_type>>
+	vector(InputIt, InputIt, Alloc = Alloc())
+	  -> vector<typename std::iterator_traits<InputIt>::value_type, Alloc>;
 }
 
