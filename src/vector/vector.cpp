@@ -213,6 +213,43 @@ export namespace isl {
         constexpr void shrink_to_fit() {
             this->reallocate(this->size_, this->size_);
         }
+
+        constexpr iterator begin() noexcept {
+            return this->storage;
+        }
+        constexpr const_iterator begin() const noexcept {
+            return this->storage;
+        }
+        constexpr const_iterator cbegin() const noexcept {
+            return this->storage;
+        }
+        constexpr iterator end() noexcept {
+            return this->storage + this->capacity_;
+        }
+        constexpr const_iterator end() const noexcept {
+            return this->storage + this->capacity_;
+        }
+        constexpr const_iterator cend() const noexcept {
+            return this->storage + this->capacity_;
+        }
+        constexpr reverse_iterator rbegin() noexcept {
+            return reverse_iterator(this->storage);
+        }
+        constexpr const_reverse_iterator rbegin() const noexcept {
+            return reverse_iterator(this->storage);
+        }
+        constexpr const_reverse_iterator crbegin() const noexcept {
+            return reverse_iterator(this->storage);
+        }
+        constexpr reverse_iterator rend() noexcept {
+            return reverse_iterator(this->storage + this->capacity_);
+        }
+        constexpr const_reverse_iterator rend() const noexcept {
+            return reverse_iterator(this->storage + this->capacity_);
+        }
+        constexpr const_reverse_iterator crend() const noexcept {
+            return reverse_iterator(this->storage + this->capacity_);
+        }
 	};
 	namespace pmr {
 		template<class T>
