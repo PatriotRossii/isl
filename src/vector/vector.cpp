@@ -166,6 +166,17 @@ export namespace isl {
 				ilist.begin(), ilist.end(), this->storage
 			);
 		}
+
+		constexpr void assign(size_type count, const T& value) {
+			(*this) = vector(count, value);
+		}
+		template<class InputIt>
+		constexpr void assign(InputIt first, InputIt last) {
+			(*this) = vector(first, last);
+		}
+		constexpr void assing(std::initializer_list<T> ilist) {
+			(*this) = vector(ilist);
+		}
 	};
 	namespace pmr {
 		template<class T>
