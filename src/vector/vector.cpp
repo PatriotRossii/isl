@@ -8,6 +8,8 @@ module;
 #include <algorithm> // std::uninitalized_fill_n
 #include <limits> // std::numeric_limits
 
+#include <stdexcept> // std::out_of_range
+
 export module vector;
 
 namespace std {
@@ -249,6 +251,37 @@ export namespace isl {
         }
         constexpr const_reverse_iterator crend() const noexcept {
             return reverse_iterator(this->storage + this->capacity_);
+        }
+
+        constexpr reference at(size_type pos) {
+            if(!(pos < this->size_)) {
+                throw std::out_of_range{"OUT OF BOUNDS!"};
+            }
+            return this->storage[pos];
+        }
+        constexpr reference operator[](size_type pos) {
+            return this->storage[pos];
+        }
+        constexpr const_reference operator[](size_type pos) const {
+            return this->storage[pos];
+        }
+        constexpr reference front() {
+            return this->storage[0];
+        }
+        constexpr const_reference front() const {
+            return this->storage[0];
+        }
+        constexpr reference back() {
+            return this->storage[this->capacity_ - 1];
+        }
+        constexpr const_reference back() const {
+            return this->storage[this->capacity_ - 1];
+        }
+        constexpr T* data() noexcept {
+            return &this->storage;
+        }
+        constexpr const T* data() const noexcept {
+            return &this->storage;
         }
 	};
 	namespace pmr {
