@@ -30,7 +30,15 @@ export namespace isl {
 		T* storage;
 		std::size_t capacity_;
 		std::size_t size_;
-
+        
+        int get_new_capacity(std::size_t old_capacity, std::size_t count_of_elements) {
+            if(count_of_elements > old_capacity) {
+                while(old_capacity < count_of_elements) {
+                    old_capacity *= 2;
+                }
+            }
+            return old_capacity;
+        }
 		void assign_size_capacity(std::size_t new_value) {
 			this->capacity_ = new_value;
 			this->size_ = new_value;
@@ -324,6 +332,22 @@ export namespace isl {
         }
         constexpr void pop_back() {
             std::destroy_at(this->storage + (this->size_ -= 1));
+        }
+        constexpr void resize(size_type count, const value_type& value) {
+            if(auto old_capacity = this->old_capacity; count > this->size_) {
+                this->reallocate(get_new_capacity(old_capacity, count), old_capacity);
+                for(auto it = this->storage + old_capacity; it != this->storage_ + count; ++it) {
+                    std::construct_at(count, value);
+                }
+            } else {
+                for(auto it = this->storage + count; it != this->end(); ++it) {
+                    std::destroy_at(it);
+                }
+                this->size_ = count;
+            }
+        }
+        constexpr void resize(size_type count) {
+            this->resize(count, value_type());
         }
 	};
 	namespace pmr {
