@@ -43,6 +43,7 @@ export namespace isl {
                 this->storage, this->storage + old_capacity, new_storage
             );
 
+            std::destroy_at(this->storage, old_capacity);
             allocator.deallocate(this->storage, old_capacity);
 
             this->storage = new_storage;
@@ -153,6 +154,7 @@ export namespace isl {
 		}
 		constexpr ~vector() {
 			allocator.deallocate(storage, capacity_);
+            std::destroy_at(storage, storage + capacity_);
 		}
 
 		constexpr vector& operator=(const vector& other) {
@@ -286,6 +288,39 @@ export namespace isl {
         }
         constexpr const T* data() const noexcept {
             return &this->storage;
+        }
+
+        constexpr void clear() noexcept {
+            allocator.allocate(storage, this->capacity_);
+            this->size_ = 0;
+        }
+        constexpr iterator erase(const_iterator pos) {
+            auto previous = pos;
+            for(auto it = pos + 1; pos != this->end(); ++it) {
+                std::destroy_at(previous);
+                std::construct_at(previous, *it);
+                previous = it;
+            }
+            this->size_ -= 1;
+            return pos;
+        }
+        constexpr iterator erase(const_iterator first, const_iterator last) {
+            size_t count = last - first;            
+            if(count == 0) {
+                return last;
+            }
+
+            auto previous_end = this->end();
+            for(auto it = last; last != end; ++it) {
+                std::destroy_at(first);
+                *(first++) = *it;
+            }
+
+            this->size_ -= count;
+            if(last == previous_end) {
+                return this->end();
+            }
+            return first;
         }
 	};
 	namespace pmr {
