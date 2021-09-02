@@ -35,15 +35,18 @@ export namespace isl {
 			this->capacity_ = new_value;
 			this->size_ = new_value;
 		}
-        void reallocate(std::size_t new_capacity, std::size_t old_capacity) {
-            T* new_storage = new T[new_capacity];
+        void reallocate(std::size_t new_capacity, std::size_t old_capacity) {            
+            T* new_storage;
+            allocator.allocate(new_storage, new_capacity);
             
             std::copy(
                 this->storage, this->storage + old_capacity, new_storage
             );
 
-            delete[] this->storage;
+            allocator.deallocate(this->storage, old_capacity);
+
             this->storage = new_storage;
+            this->capacity_ = new_capacity;
         }
         void reallocate(std::size_t new_capacity) {
             this->reallocate(new_capacity, this->capacity_);
@@ -227,31 +230,31 @@ export namespace isl {
             return this->storage;
         }
         constexpr iterator end() noexcept {
-            return this->storage + this->capacity_;
+            return this->storage + this->size_;
         }
         constexpr const_iterator end() const noexcept {
-            return this->storage + this->capacity_;
+            return this->storage + this->size_;
         }
         constexpr const_iterator cend() const noexcept {
-            return this->storage + this->capacity_;
+            return this->storage + this->size_;
         }
         constexpr reverse_iterator rbegin() noexcept {
-            return reverse_iterator(this->storage);
+            return reverse_iterator(this->size_);
         }
         constexpr const_reverse_iterator rbegin() const noexcept {
-            return reverse_iterator(this->storage);
+            return reverse_iterator(this->size_);
         }
         constexpr const_reverse_iterator crbegin() const noexcept {
-            return reverse_iterator(this->storage);
+            return reverse_iterator(this->size_);
         }
         constexpr reverse_iterator rend() noexcept {
-            return reverse_iterator(this->storage + this->capacity_);
+            return reverse_iterator(this->storage + this->size_);
         }
         constexpr const_reverse_iterator rend() const noexcept {
-            return reverse_iterator(this->storage + this->capacity_);
+            return reverse_iterator(this->storage + this->size_);
         }
         constexpr const_reverse_iterator crend() const noexcept {
-            return reverse_iterator(this->storage + this->capacity_);
+            return reverse_iterator(this->storage + this->size_);
         }
 
         constexpr reference at(size_type pos) {
