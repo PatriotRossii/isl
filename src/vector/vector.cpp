@@ -311,7 +311,7 @@ export namespace isl {
             }
 
             auto previous_end = this->end();
-            for(auto it = last; last != end; ++it) {
+            for(auto it = last; last != previous_end; ++it) {
                 std::destroy_at(first);
                 *(first++) = *it;
             }
@@ -321,6 +321,9 @@ export namespace isl {
                 return this->end();
             }
             return first;
+        }
+        constexpr void pop_back() {
+            std::destroy_at(this->storage + (this->size_ -= 1));
         }
 	};
 	namespace pmr {
