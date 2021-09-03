@@ -427,9 +427,45 @@ export namespace isl {
             }
             return first;
         }
+
+        // push_back
+
+        constexpr void push_back(const T& value) {
+            size_t previous_size = this->size_;
+            this->reallocate_if_needed(previous_size + 1);
+            this->storage[
+                previous_size
+            ] = value;
+        }
+        constexpr void push_back(T&& value) {
+            size_t previous_size = this->size_;
+            this->reallocate_if_needed(previous_size + 1);
+            this->storage[
+                previous_size
+            ] = std::move(value);
+        }
+
+        // emplace_back
+
+        template<class... Args>
+        constexpr reference emplace_back(Args&&... args) {
+            size_t previous_size = this->size_;
+            this->reallocate_if_needed(previous_size + 1);
+            this->storage[
+                previous_size
+            ] = value_type(std::forward<Args>(args)...);
+            
+            return this->storage[previous_size];
+        }
+
+        // pop_back
+
         constexpr void pop_back() {
             std::destroy_at(this->storage + (this->size_ -= 1));
         }
+
+        // resize
+
         constexpr void resize(size_type count, const value_type& value) {
             if(size_t old_capacity = this->capacity_; need_reallocation(count)) {
                 this->reallocate_if_needed(count);
