@@ -451,10 +451,8 @@ export namespace isl {
         constexpr reference emplace_back(Args&&... args) {
             size_t previous_size = this->size_;
             this->reallocate_if_needed(previous_size + 1);
-            this->storage[
-                previous_size
-            ] = value_type(std::forward<Args>(args)...);
-            
+            this->allocator.construct(&this->storage[previous_size],
+                                      std::forward<Args>(args)...);
             return this->storage[previous_size];
         }
 
