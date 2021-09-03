@@ -24,6 +24,24 @@ export namespace isl {
 	template<class T,
 			class Allocator = std::allocator<T>
 	> class vector {
+    public:
+        using value_type = T;
+        using allocator_type = Allocator;
+
+        using size_type = std::size_t;
+        using difference_type = std::ptrdiff_t;
+
+        using reference = value_type&;
+        using const_reference = const value_type&;
+
+        using pointer = typename std::allocator_traits<Allocator>::pointer;
+        using const_pointer = typename std::allocator_traits<Allocator>::const_pointer;
+
+        using iterator = T*;
+        using const_iterator = const T*;
+
+        using reverse_iterator = std::reverse_iterator<iterator>;
+        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 	private:
 		Allocator allocator;
 
@@ -43,6 +61,7 @@ export namespace isl {
 			this->capacity_ = new_value;
 			this->size_ = new_value;
 		}
+        
         void reallocate(std::size_t new_capacity, std::size_t old_capacity) {            
             T* new_storage;
             allocator.allocate(new_storage, new_capacity);
@@ -57,28 +76,27 @@ export namespace isl {
             this->storage = new_storage;
             this->capacity_ = new_capacity;
         }
+
+        bool need_reallocation(std::size_t new_size) {
+            return new_size > this->capacity_;
+        }
+        void reallocate_if_needed(std::size_t new_size) {
+            if(size_t old_capacity = this->capacity_; need_reallocation(new_size)) {
+                this->reallocate(
+                    this->get_new_capacity(new_size, old_capacity), old_capacity
+                );
+            }
+        }
+
         void reallocate(std::size_t new_capacity) {
             this->reallocate(new_capacity, this->capacity_);
         }
+        void right_shift(const_iterator from, std::size_t count) {
+            for(auto it = this->end(); it != from; --it) {
+                *(it + count) = *it;
+            }
+        }
 	public:
-		using value_type = T;
-		using allocator_type = Allocator;
-
-		using size_type = std::size_t;
-		using difference_type = std::ptrdiff_t;
-
-		using reference = value_type&;
-		using const_reference = const value_type&;
-
-		using pointer = typename std::allocator_traits<Allocator>::pointer;
-		using const_pointer = typename std::allocator_traits<Allocator>::const_pointer;
-
-		using iterator = T*;
-		using const_iterator = const T*;
-
-		using reverse_iterator = std::reverse_iterator<iterator>;
-		using const_reverse_iterator = std::reverse_iterator<const_iterator>;
-
 		constexpr vector() noexcept(noexcept(Allocator())) { }
 		constexpr explicit vector(const Allocator& alloc) noexcept: allocator(alloc) { }
 		constexpr vector(size_type count,
@@ -302,6 +320,57 @@ export namespace isl {
             allocator.allocate(storage, this->capacity_);
             this->size_ = 0;
         }
+
+        // insert
+
+        /// Initial state: [0, 1, 2, 3, 4, 5]
+        /// Insert 0,             ^
+        /// Finish state: [0, 1, 0, 2, 3, 4, 5]
+        constexpr iterator insert(const_iterator pos, const T& value) {
+            this->reallocate_if_needed(this->size_ + 1);
+            this->right_shift(1);
+            
+            *pos = value;
+        }
+        constexpr iterator insert(const_iterator pos, T&& value) {
+            this->reallocate_if_needed(this->size_ + 1);
+            this->right_shift(1);
+            
+            *pos = std::move(value);
+        }
+        constexpr iterator insert(const_iterator pos, size_type count,
+                                  const T& value) {
+            this->reallocate_if_needed(this->size_ + count);
+            this->right_shift(count);
+            
+            for(; count != 0; --count, ++pos) {
+                *pos = value;
+            }
+        }
+        template<class InputIt>
+        constexpr iterator insert(const_iterator pos, InputIt first, InputIt last) {
+            size_t count = std::distance(first, last);
+
+            this->reallocate_if_needed(this->size_ + 1);
+            this->right_shift(count);
+
+            for(; count != 0; --count, ++pos, ++first) {
+                *pos = *first;
+            }
+        }
+        constexpr iterator insert(const_iterator pos, std::initializer_list<T> ilist) {
+            size_t size = ilist.size();
+
+            this->reallocate_if_needed(this->size_ + size);
+            this->right_shift(size);
+
+            for(auto it = ilist.begin(); size != 0; ++it, ++pos, --size) {
+                *pos = *it;
+            }
+        }
+
+        // erase
+
         constexpr iterator erase(const_iterator pos) {
             auto previous = pos;
             for(auto it = pos + 1; pos != this->end(); ++it) {
@@ -334,10 +403,10 @@ export namespace isl {
             std::destroy_at(this->storage + (this->size_ -= 1));
         }
         constexpr void resize(size_type count, const value_type& value) {
-            if(auto old_capacity = this->old_capacity; count > this->size_) {
-                this->reallocate(get_new_capacity(old_capacity, count), old_capacity);
-                for(auto it = this->storage + old_capacity; it != this->storage_ + count; ++it) {
-                    std::construct_at(count, value);
+            if(size_t old_capacity = this->capacity_; need_reallocation(count)) {
+                this->reallocate_if_needed(count);
+                for(auto it = this->storage + old_capacity; it != this->end(); ++it) {
+                    std::construct_at(it, value);
                 }
             } else {
                 for(auto it = this->storage + count; it != this->end(); ++it) {
