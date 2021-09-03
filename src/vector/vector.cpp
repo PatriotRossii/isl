@@ -369,6 +369,28 @@ export namespace isl {
             }
         }
 
+        // emplace
+
+        template<typename... Args>
+        constexpr iterator emplace(const_iterator pos, Args&&... args) {
+            // OH SHIT, ALL ITERATORS ARE INVALIDATED
+            // WHAT I'M DOING
+
+            bool last_element = pos == this->end();
+            T* storage = pos;
+
+            this->reallocate_if_needed(this->size_ + 1);
+            this->right_shift(1);
+
+            if(!last_element) {
+                T* temporary_buffer;
+                this->allocator.allocate(temporary_buffer, 1);
+                storage = temporary_buffer;
+            }
+
+            this->allocator.construct(storage, std::forward<Args>(args)...);
+        }
+
         // erase
 
         constexpr iterator erase(const_iterator pos) {
