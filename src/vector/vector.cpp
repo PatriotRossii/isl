@@ -327,45 +327,53 @@ export namespace isl {
         /// Insert 0,             ^
         /// Finish state: [0, 1, 0, 2, 3, 4, 5]
         constexpr iterator insert(const_iterator pos, const T& value) {
+            size_t distance = std::distance(this->begin(), pos);
+
             this->reallocate_if_needed(this->size_ + 1);
             this->right_shift(1);
             
-            *pos = value;
+            *(this->begin() + distance) = value;
         }
         constexpr iterator insert(const_iterator pos, T&& value) {
+            size_t distance = std::distance(this->begin(), pos);
+
             this->reallocate_if_needed(this->size_ + 1);
             this->right_shift(1);
             
-            *pos = std::move(value);
+            *(this->begin() + distance) = std::move(value);
         }
         constexpr iterator insert(const_iterator pos, size_type count,
                                   const T& value) {
+            size_t distance = std::distance(this->begin(), pos);
+
             this->reallocate_if_needed(this->size_ + count);
             this->right_shift(count);
             
-            for(; count != 0; --count, ++pos) {
-                *pos = value;
+            for(auto it = this->begin() + distance; count != 0; --count, ++it) {
+                *it = value;
             }
         }
         template<class InputIt>
         constexpr iterator insert(const_iterator pos, InputIt first, InputIt last) {
+            size_t distance = std::distance(this->begin(), pos);
             size_t count = std::distance(first, last);
 
             this->reallocate_if_needed(this->size_ + 1);
-            this->right_shift(count);
+            this->right_shift(distance);
 
-            for(; count != 0; --count, ++pos, ++first) {
-                *pos = *first;
+            for(auto it = this->begin() + distance; count != 0; --count, ++it, ++first) {
+                *it = *first;
             }
         }
         constexpr iterator insert(const_iterator pos, std::initializer_list<T> ilist) {
+            size_t distance = std::distance(this->begin(), pos);
             size_t size = ilist.size();
 
             this->reallocate_if_needed(this->size_ + size);
             this->right_shift(size);
 
-            for(auto it = ilist.begin(); size != 0; ++it, ++pos, --size) {
-                *pos = *it;
+            for(auto it = this->begin() + distance, first = ilist.begin(); size != 0; --size, ++it, ++first) {
+                *it = *first;
             }
         }
 
@@ -373,15 +381,13 @@ export namespace isl {
 
         template<typename... Args>
         constexpr iterator emplace(const_iterator pos, Args&&... args) {
-            // OH SHIT, ALL ITERATORS ARE INVALIDATED
-            // WHAT I'M DOING
-
+            size_t distance = std::distance(this->begin(), pos);
             bool last_element = pos == this->end();
-            T* storage = pos;
 
             this->reallocate_if_needed(this->size_ + 1);
             this->right_shift(1);
 
+            T* storage = this->begin() + distance;
             if(!last_element) {
                 T* temporary_buffer;
                 this->allocator.allocate(temporary_buffer, 1);
