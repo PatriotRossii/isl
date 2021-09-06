@@ -171,6 +171,10 @@ export namespace isl {
 			!std::is_same_v<std::remove_cvref_t<U>, optional<T>>
 		): data(std::forward<U>(value)) { }
 	
+		constexpr void reset() noexcept {
+			this->data.clean_up();
+		}
+
 		constexpr ~optional() requires(
 			std::is_trivially_destructible_v<T>
 		) { }
