@@ -43,7 +43,6 @@ namespace isl::detail {
 	template<typename T>
 	union optional_value {
 		T value;
-		isl::nullopt_t empty_value;
 	};
 
 	template<typename T>
@@ -51,14 +50,13 @@ namespace isl::detail {
 		optional_status status;
 		optional_value<T> data;
 
-
 		void clean_up() {
 			if(status == optional_status::Empty) { return; }			
 			data.value.~T();
 		}
 		void clear() {
 			this->clean_up();
-			data.empty_value = nullopt_t(0);
+			status = optional_status::Empty;
 		}
 
 		void set_value(const T&& value) {
@@ -70,7 +68,7 @@ namespace isl::detail {
 			new (&data.value) T(value);
 		}
 
-		optional_wrapper(): data(nullopt_t(0)) {
+		optional_wrapper() {
 			status = optional_status::Empty;
 		}
 		optional_wrapper(const T& value): data(value) {
