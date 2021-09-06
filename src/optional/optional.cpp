@@ -170,6 +170,13 @@ export namespace isl {
 			!std::is_same_v<std::remove_cvref_t<U>, std::in_place_t> &&
 			!std::is_same_v<std::remove_cvref_t<U>, optional<T>>
 		): data(std::forward<U>(value)) { }
+	
+		constexpr ~optional() requires(
+			std::is_trivially_destructible_v<T>
+		) { }
+		constexpr ~optional() {
+			this->data.clean_up();
+		}
 	};
 
 	template<class T>
