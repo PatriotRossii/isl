@@ -6,181 +6,150 @@ module;
 export module optional;
 
 export namespace isl {
-	template<class T>
-	class optional;
+template <class T> class optional;
 
-	struct nullopt_t {
-		explicit constexpr nullopt_t(int) { }
-	};
-}
+struct nullopt_t {
+  explicit constexpr nullopt_t(int) {}
+};
+} // namespace isl
 
 namespace isl::detail {
-	template<typename T, typename U>
-	auto checker_impl(int) -> std::true_type requires(
-		!std::is_constructible_v<T, optional<U>&> &&
-		!std::is_constructible_v<T, const optional<U>&> && 
-		!std::is_constructible_v<T, optional<U>&&> &&
-		!std::is_constructible_v<T, const optional<U>&&> &&
-		!std::is_convertible_v<optional<U>&, T> &&
-		!std::is_convertible_v<const optional<U>&, T> &&
-		!std::is_convertible_v<const optional<U>&, T> &&
-		!std::is_convertible_v<const optional<U>&&, T>
-	);
-	template<typename T, typename U>
-	auto checker_impl(...) -> std::false_type;
+template <typename T, typename U>
+auto checker_impl(int) -> std::true_type
+    requires(!std::is_constructible_v<T, optional<U> &> &&
+             !std::is_constructible_v<T, const optional<U> &> &&
+             !std::is_constructible_v<T, optional<U> &&> &&
+             !std::is_constructible_v<T, const optional<U> &&> &&
+             !std::is_convertible_v<optional<U> &, T> &&
+             !std::is_convertible_v<const optional<U> &, T> &&
+             !std::is_convertible_v<const optional<U> &, T> &&
+             !std::is_convertible_v<const optional<U> &&, T>);
+template <typename T, typename U> auto checker_impl(...) -> std::false_type;
 
-	template<typename T, typename U>
-	auto can_construct() -> decltype(checker_impl<T, U>(0));
+template <typename T, typename U>
+auto can_construct() -> decltype(checker_impl<T, U>(0));
 
-	template<typename T, typename U>
-	static constexpr bool can_construct_v = decltype(can_construct<T, U>())::value;
+template <typename T, typename U>
+static constexpr bool can_construct_v = decltype(can_construct<T, U>())::value;
 
-	enum class optional_status {
-		Empty,
-		Value
-	};
+enum class optional_status { Empty, Value };
 
-	template<typename T>
-	union optional_value {
-		T value;
-	};
+template <typename T> union optional_value { T value; };
 
-	template<typename T>
-	struct optional_wrapper {
-		optional_status status;
-		optional_value<T> data;
+template <typename T> struct optional_wrapper {
+  optional_status status;
+  optional_value<T> data;
 
-		void clean_up() {
-			if(status == optional_status::Empty) { return; }			
-			data.value.~T();
-		}
-		void clear() {
-			this->clean_up();
-			status = optional_status::Empty;
-		}
+  void clean_up() {
+    if (status == optional_status::Empty) {
+      return;
+    }
+    data.value.~T();
+  }
+  void clear() {
+    this->clean_up();
+    status = optional_status::Empty;
+  }
 
-		void set_value(const T&& value) {
-			this->clean_up();
-			new (&data.value) T(value);
-		}
-		void set_value(const T& value) {
-			this->clean_up();
-			new (&data.value) T(value);
-		}
+  void set_value(const T &&value) {
+    this->clean_up();
+    new (&data.value) T(value);
+  }
+  void set_value(const T &value) {
+    this->clean_up();
+    new (&data.value) T(value);
+  }
 
-		optional_wrapper() {
-			status = optional_status::Empty;
-		}
-		optional_wrapper(const T& value): data(value) {
-			status = optional_status::Value;
-		}
-		optional_wrapper(T&& value): data(std::move(value)) {
-			status = optional_status::Value;
-		}
-		template<typename... Args>
-		optional_wrapper(Args&&... args): data(
-			std::forward<Args>(args)...
-		) {
-			status = optional_status::Value;
-		}
+  optional_wrapper() { status = optional_status::Empty; }
+  optional_wrapper(const T &value) : data(value) {
+    status = optional_status::Value;
+  }
+  optional_wrapper(T &&value) : data(std::move(value)) {
+    status = optional_status::Value;
+  }
+  template <typename... Args>
+  optional_wrapper(Args &&...args) : data(std::forward<Args>(args)...) {
+    status = optional_status::Value;
+  }
 
-		template<typename U>
-		optional_wrapper(U&& value): data(std::move(value)) {
-			status = optional_status::Value;
-		}
+  template <typename U> optional_wrapper(U &&value) : data(std::move(value)) {
+    status = optional_status::Value;
+  }
 
-		optional_wrapper(const optional_wrapper<T>& value): data(
-			value.data
-		) { }
-		optional_wrapper(optional_wrapper<T>&& value): data(
-			std::move(value.data)
-		) { }
+  optional_wrapper(const optional_wrapper<T> &value) : data(value.data) {}
+  optional_wrapper(optional_wrapper<T> &&value) : data(std::move(value.data)) {}
 
-		template<typename U>
-		optional_wrapper(const optional_wrapper<U>& value): data(
-			value.data
-		) { }
-		template<typename U>
-		optional_wrapper(optional_wrapper<U>&& value): data(
-			std::move(value.data)
-		) { }
-	};
-}
+  template <typename U>
+  optional_wrapper(const optional_wrapper<U> &value) : data(value.data) {}
+  template <typename U>
+  optional_wrapper(optional_wrapper<U> &&value) : data(std::move(value.data)) {}
+};
+} // namespace isl::detail
 
 export namespace isl {
-	template<class T>
-	class optional {
-	private:
-		detail::optional_wrapper<T> data;
-	public:
-		using value_type = T;
-	public:
-		constexpr optional(nullopt_t) noexcept { }
+template <class T> class optional {
+private:
+  detail::optional_wrapper<T> data;
 
-		constexpr optional(const optional& other): data(other.data) { }
-		constexpr optional(const optional& other) requires(
-			!std::is_copy_constructible_v<T>
-		) = delete;
+public:
+  using value_type = T;
 
-		constexpr optional(optional&& other) noexcept(
-			std::is_nothrow_move_constructible_v<T>
-		) requires(
-			std::is_move_constructible_v<T>
-		): data(std::move(other.data)) { }
+public:
+  constexpr optional(nullopt_t) noexcept {}
 
-		template<class U>
-		explicit(
-			!std::is_convertible_v<const U&, T>
-		) constexpr optional(const optional<U>& other) requires(
-			std::is_constructible_v<T, const U&> &&
-			!detail::can_construct_v<T, U>
-		): data(other.data) { }
+  constexpr optional(const optional &other) : data(other.data) {}
+  constexpr optional(const optional &other) requires(
+      !std::is_copy_constructible_v<T>) = delete;
 
-		template<class U>
-		explicit(
-			!std::is_convertible_v<U&&, T>
-		) constexpr optional(optional<U>&& other) requires(
-			std::is_constructible_v<T, U&&> &&
-			!detail::can_construct_v<T, U>
-		): data(std::move(other.data)) { }
+  constexpr optional(optional &&other) noexcept(
+      std::is_nothrow_move_constructible_v<
+          T>) requires(std::is_move_constructible_v<T>)
+      : data(std::move(other.data)) {}
 
-		template<class... Args>
-		constexpr explicit optional(std::in_place_t, Args&&... args) requires(
-			std::is_constructible_v<T, Args...>
-		): data(std::forward<Args>(args)...) { }
+  template <class U>
+  explicit(!std::is_convertible_v<const U &, T>) constexpr optional(
+      const optional<U>
+          &other) requires(std::is_constructible_v<T, const U &> &&
+                           !detail::can_construct_v<T, U>)
+      : data(other.data) {}
 
-		template<class U, class... Args>
-		constexpr explicit optional(std::in_place_t,
-									std::initializer_list<U> ilist,
-									Args&&... args) requires(
-			std::is_constructible_v<T, std::initializer_list<U>&, Args&&...>
-		): data(std::forward<Args>(args)...) { }
+  template <class U>
+  explicit(!std::is_convertible_v<U &&, T>) constexpr optional(
+      optional<U> &&other) requires(std::is_constructible_v<T, U &&> &&
+                                    !detail::can_construct_v<T, U>)
+      : data(std::move(other.data)) {}
 
-		template<class U = T>
-		explicit(
-			!std::is_constructible_v<U&&, T>
-		) constexpr optional(U&& value) requires(
-			std::is_constructible_v<T, U&&> &&
+  template <class... Args>
+  constexpr explicit optional(std::in_place_t, Args &&...args) requires(
+      std::is_constructible_v<T, Args...>)
+      : data(std::forward<Args>(args)...) {}
 
-			!std::is_same_v<std::decay_t<U>, std::in_place_t> &&
-			!std::is_same_v<std::decay_t<U>, optional<T>> &&
+  template <class U, class... Args>
+  constexpr explicit optional(
+      std::in_place_t, std::initializer_list<U> ilist,
+      Args &&...args) requires(std::is_constructible_v<T,
+                                                       std::initializer_list<U>
+                                                           &,
+                                                       Args &&...>)
+      : data(std::forward<Args>(args)...) {}
 
-			!std::is_same_v<std::remove_cvref_t<U>, std::in_place_t> &&
-			!std::is_same_v<std::remove_cvref_t<U>, optional<T>>
-		): data(std::forward<U>(value)) { }
-	
-		constexpr void reset() noexcept {
-			this->data.clean_up();
-		}
+  template <class U = T>
+  explicit(!std::is_constructible_v<U &&, T>) constexpr optional(
+      U &&value) requires(std::is_constructible_v<T, U &&> &&
 
-		constexpr ~optional() requires(
-			std::is_trivially_destructible_v<T>
-		) { }
-		constexpr ~optional() {
-			this->data.clean_up();
-		}
-	};
+                          !std::is_same_v<std::decay_t<U>, std::in_place_t> &&
+                          !std::is_same_v<std::decay_t<U>, optional<T>> &&
 
-	template<class T>
-	optional(T) -> optional<T>;
-}
+                          !std::is_same_v<std::remove_cvref_t<U>,
+                                          std::in_place_t> &&
+                          !std::is_same_v<std::remove_cvref_t<U>, optional<T>>)
+      : data(std::forward<U>(value)) {}
+
+  constexpr void reset() noexcept { this->data.clean_up(); }
+
+  constexpr ~optional() requires(std::is_trivially_destructible_v<T>) {}
+  constexpr ~optional() { this->data.clean_up(); }
+};
+
+template <class T> optional(T) -> optional<T>;
+} // namespace isl
