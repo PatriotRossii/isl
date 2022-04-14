@@ -11,6 +11,13 @@ namespace isl {
         };
         template<std::intmax_t Value>
         constexpr intmax_t __static_abs_v = __static_abs<Value>::value;
+
+        template<std::intmax_t Value>
+        struct __static_sign {
+            static const intmax_t value = Value == 0 ? 0 : (Value < 0 ? -1 : 1);
+        };
+        template<std::intmax_t Value>
+        constexpr intmax_t __static_sign_v = __static_sign<Value>::value;
     }
 
     template<
@@ -21,7 +28,7 @@ namespace isl {
         static_assert(Denom != 0, "ratio divide by 0");
         static_assert(__impl::__static_abs_v<Denom> >= 0, "ratio denominator is out of range");
     public:
-        static constexpr std::intmax_t num = std::signbit(Denom) * Num / std::gcd(Num, Denom);
+        static constexpr std::intmax_t num = __impl::__static_sign_v<Denom> * Num / std::gcd(Num, Denom);
         static constexpr std::intmax_t den = __impl::__static_abs_v<Denom> / std::gcd(Num, Denom);
         using type = ratio<num, den>;
     };
