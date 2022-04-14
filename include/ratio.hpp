@@ -4,16 +4,25 @@
 #include <type_traits>
 
 namespace isl {
+    namespace __impl {
+        template<std::intmax_t Value> 
+        struct __static_abs {
+            static const intmax_t value = Value < 0 ? -Value : Value;
+        };
+        template<std::intmax_t Value>
+        constexpr intmax_t __static_abs_v = __static_abs<Value>::value;
+    }
+
     template<
         std::intmax_t Num,
         std::intmax_t Denom = 1
     > class ratio {
-        static_assert(std::abs(Num) >= 0, "ratio numerator is out of range");
+        static_assert(__impl::__static_abs_v<Num> >= 0, "ratio numerator is out of range");
         static_assert(Denom != 0, "ratio divide by 0");
-        static_assert(std::abs(Denom) >= 0, "ratio denominator is out of range");
+        static_assert(__impl::__static_abs_v<Denom> >= 0, "ratio denominator is out of range");
     public:
         static constexpr std::intmax_t num = std::signbit(Denom) * Num / std::gcd(Num, Denom);
-        static constexpr std::intmax_t den = std::abs(Denom) / std::gcd(Num, Denom);
+        static constexpr std::intmax_t den = __impl::__static_abs_v<Denom> / std::gcd(Num, Denom);
         using type = ratio<num, den>;
     };
 
