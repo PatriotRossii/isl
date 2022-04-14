@@ -16,6 +16,26 @@ namespace isl {
         using type = isl::ratio<num, den>;
     };
 
+    template<class R1, class R2>
+    using ratio_add = typename isl::ratio<
+        R1::num * R2::den + R2::num * R1::den, R1::den * R2::den
+    >::type;
+
+    template<class R1, class R2>
+    using ratio_subtract = typename isl::ratio<
+        R1::num * R2::den - R2::num * R1::den, R1::den * R2::den
+    >::type;
+
+    template<class R1, class R2>
+    using ratio_multiply = typename isl::ratio<
+        R1::num * R2::num, R1::den * R2::den
+    >::type;
+
+    template<class R1, class R2>
+    using ratio_divide = typename isl::ratio<
+        R1::num * R2::den, R1::den * R2::num
+    >::type;
+
     using atto = isl::ratio<1, 1000000000000000000>;
     using femto = isl::ratio<1, 1000000000000000>;
     using pico = isl::ratio<1, 1000000000000>;
