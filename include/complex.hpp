@@ -1,3 +1,11 @@
+template<class>
+class complex;
+
+template<class T>
+constexpr complex<T> operator*(const complex<T>& lhs, const complex<T>& rhs);
+template<class T>
+constexpr complex<T> operator/(const complex<T>& lhs, const complex<T>& rhs);
+
 template<class T>
 class complex {
     T re_, im_;
@@ -7,6 +15,28 @@ public:
     template<class X>
     constexpr complex(const complex<X>& other):
         re_(other.re_), im_(other.im_) { }
+
+    constexpr complex& operator=(const T& x) {
+        re_ = x, im_ = 0;
+        return *this;
+    }
+
+    constexpr complex& operator+=(const T& other) {
+        re_ += other;
+        return *this;
+    }
+    constexpr complex& operator-=(const T& other) {
+        re_ -= other;
+        return *this;
+    }
+    constexpr complex& operator*=(const T& other) {
+        re_ *= other, im_ *= other;
+        return *this;
+    }
+    constexpr complex& operator/=(const T& other) {
+        re_ /= other, im_ /= other;
+        return *this;
+    }
 
     T real() const {
         return re_;
@@ -29,6 +59,60 @@ public:
     explicit constexpr complex(const complex<double>& other);
     explicit constexpr complex(const complex<long double>& other);
 
+    constexpr complex& operator=(float x) {
+        re_ = x, im_ = 0;
+        return *this;
+    }
+    constexpr complex& operator=(const complex& cx) {
+        re_ = cx.real(), im_ = cx.imag();
+        return *this;
+    }
+    template<class X>
+    constexpr complex& operator=(const complex<X>& cx) {
+        re_ = cx.real(), im_ = cx.imag();
+        return *this;
+    }
+
+    constexpr complex& operator+=(float other) {
+        re_ += other;
+        return *this;
+    }
+    constexpr complex& operator-=(float other) {
+        re_ -= other;
+        return *this;
+    }
+    constexpr complex& operator*=(float other) {
+        re_ *= other, im_ *= other;
+        return *this;
+    }
+    constexpr complex& operator/=(float other) {
+        re_ /= other, im_ /= other;
+        return *this;
+    }
+    template<class X>
+    constexpr complex& operator+=(const complex<X>& other) {
+        re_ += other.real();
+        im_ += other.imag();
+        return *this;
+
+    }
+    template<class X>
+    constexpr complex& operator-=(const complex<X>& other) {
+        re_ -= other.real();
+        im_ -= other.imag();
+        return *this;
+    }
+    template<class X>
+    constexpr complex& operator*=(const complex<X>& other) {
+        *this = *this * complex(other.real(), other.imag());
+        return *this;
+    }
+    template<class X>
+    constexpr complex& operator/=(const complex<X>& other) {
+        *this = *this / complex(other.real(), other.imag());
+        return *this;
+    }
+
     float real() const {
         return re_;
     }
@@ -47,6 +131,59 @@ public:
     constexpr complex(const complex<float>& other);
     explicit constexpr complex(const complex<long double>& other);
 
+    constexpr complex& operator=(double x) {
+        re_ = x, im_ = 0;
+        return *this;
+    }
+    constexpr complex& operator=(const complex& cx) {
+        re_ = cx.real(), im_ = cx.imag();
+        return *this;
+    }
+    template<class X>
+    constexpr complex& operator=(const complex<X>& cx) {
+        re_ = cx.real(), im_ = cx.imag();
+        return *this;
+    }
+
+    constexpr complex& operator+=(double other) {
+        re_ += other;
+        return *this;
+    }
+    constexpr complex& operator-=(double other) {
+        re_ -= other;
+        return *this;
+    }
+    constexpr complex& operator*=(double other) {
+        re_ *= other, im_ *= other;
+        return *this;
+    }
+    constexpr complex& operator/=(double other) {
+        re_ /= other, im_ /= other;
+        return *this;
+    }
+    template<class X>
+    constexpr complex& operator+=(const complex<X>& other) {
+        re_ += other.real();
+        im_ += other.imag();
+        return *this;
+    }
+    template<class X>
+    constexpr complex& operator-=(const complex<X>& other) {
+        re_ -= other.real();
+        im_ -= other.imag();
+        return *this;
+    }
+    template<class X>
+    constexpr complex& operator*=(const complex<X>& other) {
+        *this = *this * complex(other.real(), other.imag());
+        return *this;
+    }
+    template<class X>
+    constexpr complex& operator/=(const complex<X>& other) {
+        *this = *this / complex(other.real(), other.imag());
+        return *this;
+    }
+
     double real() const {
         return re_;
     }
@@ -64,6 +201,60 @@ public:
         re_(re), im_(im) { }
     constexpr complex(const complex<float>& other);
     constexpr complex(const complex<double>& other);
+
+    constexpr complex& operator=(long double x) {
+        re_ = x, im_ = 0;
+        return *this;
+    }
+    constexpr complex& operator=(const complex& cx) {
+        re_ = cx.real(), im_ = cx.imag();
+        return *this;
+    }
+    template<class X>
+    constexpr complex& operator=(const complex<X>& cx) {
+        re_ = cx.real(), im_ = cx.imag();
+        return *this;
+    }
+
+    constexpr complex& operator+=(long double other) {
+        re_ += other;
+        return *this;
+    }
+    constexpr complex& operator-=(long double other) {
+        re_ -= other;
+        return *this;
+    }
+    constexpr complex& operator*=(long double other) {
+        re_ *= other, im_ *= other;
+        return *this;
+    }
+    constexpr complex& operator/=(long double other) {
+        re_ /= other, im_ /= other;
+        return *this;
+    }
+    template<class X>
+    constexpr complex& operator+=(const complex<X>& other) {
+        re_ += other.real();
+        im_ += other.imag();
+        return *this;
+    }
+    template<class X>
+    constexpr complex& operator-=(const complex<X>& other) {
+        re_ -= other.real();
+        im_ -= other.imag();
+        return *this;
+    }
+    template<class X>
+    constexpr complex& operator*=(const complex<X>& other) {
+        *this = *this * complex(other.real(), other.imag());
+        return *this;
+    }
+    template<class X>
+    constexpr complex& operator/=(const complex<X>& other) {
+        *this = *this / complex(other.real(), other.imag());
+        return *this;
+    }
+
 
     long double real() const {
         return re_;
