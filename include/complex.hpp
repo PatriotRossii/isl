@@ -282,6 +282,108 @@ constexpr complex<long double>::complex(const complex<double>& other):
     re_(other.real()), im_(other.imag()) { }
 
 template<class T>
+constexpr complex<T> operator+(const complex<T>& val) {
+    return complex(val);
+}
+template<class T>
+constexpr complex<T> operator-(const complex<T>& val) {
+    return complex(-val.real(), -val.imag());
+}
+
+template<typename T>
+constexpr complex<T> operator+(const complex<T>& lhs, const complex<T>& rhs) {
+    complex<T> sum(lhs);
+    sum += rhs;
+    return sum;
+}
+template<typename T>
+constexpr complex<T> operator+(const complex<T>& lhs, const T& rhs) {
+    complex<T> sum(lhs);
+    sum += rhs;
+    return sum;
+}
+template<typename T>
+constexpr complex<T> operator+(const T& lhs, const complex<T>& rhs) {
+    complex<T> sum(rhs);
+    sum += lhs;
+    return sum;
+}
+
+template<typename T>
+constexpr complex<T> operator-(const complex<T>& lhs, const complex<T>& rhs) {
+    complex<T> sum(lhs);
+    sum -= rhs;
+    return sum;
+}
+template<typename T>
+constexpr complex<T> operator-(const complex<T>& lhs, const T& rhs) {
+    complex<T> sum(lhs);
+    sum -= rhs;
+    return sum;
+}
+template<typename T>
+constexpr complex<T> operator-(const T& lhs, const complex<T>& rhs) {
+    complex<T> sum(rhs);
+    sum -= lhs;
+    return sum;
+}
+
+template<typename T>
+constexpr complex<T> operator*(const complex<T>& lhs, const complex<T>& rhs) {
+    T a = lhs.real();
+    T b = lhs.imag();
+    T c = rhs.real();
+    T d = rhs.imag();
+    T ac = a * c;
+    T bd = b * d;
+    T ad = a * d;
+    T bc = b * c;
+    T real = ac - bd;
+    T imag = ad + bc;
+    return complex(real, imag);
+}
+template<typename T>
+constexpr complex<T> operator*(const complex<T>& lhs, const T& rhs) {
+    return complex(lhs.real() * rhs, lhs.imag() * rhs);
+}
+template<typename T>
+constexpr complex<T> operator*(const T& lhs, const complex<T>& rhs) {
+    return complex(rhs.real() * lhs, rhs.imag() * lhs);
+}
+
+template<typename T>
+constexpr complex<T> operator/(const complex<T>& lhs, const complex<T>& rhs) {
+    int ilogbw = 0;
+    T a = lhs.real();
+    T b = lhs.imag();
+    T c = rhs.real();
+    T d = rhs.imag();
+    T logbw = std::logb(std::fmax(std::fabs(c), std::fabs(d)));
+
+    if(std::isfinite(logbw)) {
+        ilogbw = static_cast<int>(logbw);
+        c = std::scalbn(c, -ilogbw);
+        d = std::scalbn(d, -ilogbw);
+    }
+
+    T denom = c * c + d * d;
+    T x = std::scalbn((a * c + b * d) / denom, -ilogbw);
+    T y = std::scalbn((b * c - a * d) / denom, -ilogbw);
+
+    return complex(x, y);
+}
+template<typename T>
+constexpr complex<T> operator/(const complex<T>& lhs, const T& rhs) {
+    return complex(lhs.real() / rhs, lhs.imag() / rhs);
+}
+template<typename T>
+constexpr complex<T> operator/(const T& lhs, const complex<T>& rhs) {
+    complex<T> result(lhs);
+    result /= rhs;
+    return result;
+}
+
+template<class T>
 constexpr T real(const complex<T>& z) {
     return real(z);
 }
