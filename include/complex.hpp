@@ -1,4 +1,5 @@
 #include <cmath>
+#include <iostream>
 
 template<class>
 class complex;
@@ -381,6 +382,64 @@ constexpr complex<T> operator/(const T& lhs, const complex<T>& rhs) {
     complex<T> result(lhs);
     result /= rhs;
     return result;
+}
+
+template<class T>
+constexpr bool operator==(const complex<T>& lhs, const complex<T>& rhs) {
+    return lhs.real() == rhs.real() && lhs.imag() == rhs.imag();
+}
+template<class T>
+constexpr bool operator==(const complex<T>& lhs, const T& rhs) {
+    return lhs.real() == rhs && lhs.imag() == 0;
+}
+template<class T>
+constexpr bool operator==(const T& lhs, const complex<T>& rhs) {
+    return rhs.real() == lhs && rhs.imag() == 0;
+}
+
+template<class T>
+constexpr bool operator!=(const complex<T>& lhs, const complex<T>& rhs) {
+    return !(lhs == rhs);
+}
+template<class T>
+constexpr bool operator!=(const complex<T>& lhs, const T& rhs) {
+    return !(lhs == rhs);
+}
+template<class T>
+constexpr bool operator!=(const T& lhs, const complex<T>& rhs) {
+    return !(lhs == rhs);
+}
+
+template<class T, class CharT, class Traits>
+std::basic_ostream<CharT, Traits>&
+    operator<<(std::basic_ostream<CharT, Traits>& os,
+               const complex<T>& x) {
+    os << '(' << x.real() << ',' << x.imag() << ')';
+    return os;
+}
+
+template<class T, class CharT, class Traits>
+std::basic_istream<CharT, Traits>&
+    operator>>(std::basic_istream<CharT, Traits>& is,
+               const complex<T>& x) {
+    if(is.peek() == '(') {
+        is.ignore();
+        is >> x.real_;
+        if(is.peek() == ',') {
+            is.ignore();
+            is >> x.imag_;
+            if(is.peek() != ')') {
+                is.setstate(std::ios_base::failbit);
+            } else {
+                is.ignore();
+            }
+        } else {
+            is.setstate(std::ios_base::failbit);
+        }
+    } else {
+        is >> x.real_;
+    }
+    return is;
 }
 
 template<class T>
